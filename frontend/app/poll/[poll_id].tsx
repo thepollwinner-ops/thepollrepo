@@ -43,9 +43,8 @@ export default function PollDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [voteCount, setVoteCount] = useState('1');
-  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [purchasing, setPurchasing] = useState(false);
-  const [voting, setVoting] = useState(false);
+  const [showVoteModal, setShowVoteModal] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     if (poll_id) {
