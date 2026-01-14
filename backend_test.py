@@ -104,9 +104,9 @@ class PollWinnerAPITester:
                 "title": "Test Poll - Who will win the match?",
                 "description": "A test poll to check the system functionality",
                 "options": [
-                    {"text": "Team A", "image_base64": None},
-                    {"text": "Team B", "image_base64": None},
-                    {"text": "Draw", "image_base64": None}
+                    {"text": "Team A"},
+                    {"text": "Team B"},
+                    {"text": "Draw"}
                 ],
                 "price_per_vote": 2.0
             }
