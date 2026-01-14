@@ -4,69 +4,69 @@
     "success": true,
     "message": "Admin registered successfully",
     "details": null,
-    "timestamp": "2026-01-14T11:32:37.928870"
+    "timestamp": "2026-01-14T11:32:50.911964"
   },
   {
     "test": "Admin Login",
     "success": true,
     "message": "Admin login successful",
     "details": null,
-    "timestamp": "2026-01-14T11:32:38.215595"
+    "timestamp": "2026-01-14T11:32:51.171244"
   },
   {
     "test": "Create Poll",
-    "success": false,
-    "message": "HTTP 422",
-    "details": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"options\",0,\"image_base64\"],\"msg\":\"Input should be a valid string\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/string_type\"},{\"type\":\"string_type\",\"loc\":[\"body\",\"options\",1,\"image_base64\"],\"msg\":\"Input should be a valid string\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/string_type\"},{\"type\":\"string_type\",\"loc\":[\"body\",\"options\",2,\"image_base64\"],\"msg\":\"Input should be a valid string\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/string_type\"}]}",
-    "timestamp": "2026-01-14T11:32:38.256872"
+    "success": true,
+    "message": "Poll created with ID: poll_2a6766e90a78",
+    "details": null,
+    "timestamp": "2026-01-14T11:32:51.206702"
   },
   {
     "test": "Get Admin Polls",
     "success": true,
-    "message": "Retrieved 2 polls",
+    "message": "Retrieved 3 polls",
     "details": null,
-    "timestamp": "2026-01-14T11:32:38.375733"
+    "timestamp": "2026-01-14T11:32:51.245875"
   },
   {
     "test": "Get Public Polls",
     "success": true,
-    "message": "Retrieved 2 active polls",
+    "message": "Retrieved 3 active polls",
     "details": null,
-    "timestamp": "2026-01-14T11:32:38.411393"
+    "timestamp": "2026-01-14T11:32:51.281323"
   },
   {
     "test": "Get Specific Poll",
-    "success": false,
-    "message": "No poll ID available",
+    "success": true,
+    "message": "Retrieved poll: Test Poll - Who will win the match?",
     "details": null,
-    "timestamp": "2026-01-14T11:32:38.411986"
+    "timestamp": "2026-01-14T11:32:51.313826"
   },
   {
     "test": "Set Poll Result",
-    "success": false,
-    "message": "Missing admin token or poll ID",
+    "success": true,
+    "message": "Poll result set: Poll result set successfully",
     "details": null,
-    "timestamp": "2026-01-14T11:32:38.412005"
+    "timestamp": "2026-01-14T11:32:51.403875"
   },
   {
     "test": "Get Analytics",
     "success": true,
     "message": "Analytics retrieved successfully",
     "details": null,
-    "timestamp": "2026-01-14T11:32:38.517508"
+    "timestamp": "2026-01-14T11:32:51.436613"
   },
   {
     "test": "Invalid Admin Auth",
     "success": false,
     "message": "Expected 401, got 520",
     "details": null,
-    "timestamp": "2026-01-14T11:32:38.549021"
+    "timestamp": "2026-01-14T11:32:51.470440"
   },
   {
     "test": "Missing Auth Header",
     "success": true,
     "message": "Correctly rejected missing auth",
     "details": null,
-    "timestamp": "2026-01-14T11:32:38.582783"
+    "timestamp": "2026-01-14T11:32:51.507487"
   }
 ]
