@@ -4,69 +4,69 @@
     "success": true,
     "message": "Admin registered successfully",
     "details": null,
-    "timestamp": "2026-01-14T11:32:50.911964"
+    "timestamp": "2026-01-14T11:34:39.067386"
   },
   {
     "test": "Admin Login",
     "success": true,
     "message": "Admin login successful",
     "details": null,
-    "timestamp": "2026-01-14T11:32:51.171244"
+    "timestamp": "2026-01-14T11:34:39.330994"
   },
   {
     "test": "Create Poll",
     "success": true,
-    "message": "Poll created with ID: poll_2a6766e90a78",
+    "message": "Poll created with ID: poll_e51b5eab78f8",
     "details": null,
-    "timestamp": "2026-01-14T11:32:51.206702"
+    "timestamp": "2026-01-14T11:34:39.366051"
   },
   {
     "test": "Get Admin Polls",
     "success": true,
-    "message": "Retrieved 3 polls",
+    "message": "Retrieved 4 polls",
     "details": null,
-    "timestamp": "2026-01-14T11:32:51.245875"
+    "timestamp": "2026-01-14T11:34:39.400753"
   },
   {
     "test": "Get Public Polls",
     "success": true,
     "message": "Retrieved 3 active polls",
     "details": null,
-    "timestamp": "2026-01-14T11:32:51.281323"
+    "timestamp": "2026-01-14T11:34:39.440471"
   },
   {
     "test": "Get Specific Poll",
     "success": true,
     "message": "Retrieved poll: Test Poll - Who will win the match?",
     "details": null,
-    "timestamp": "2026-01-14T11:32:51.313826"
+    "timestamp": "2026-01-14T11:34:39.476883"
   },
   {
     "test": "Set Poll Result",
     "success": true,
     "message": "Poll result set: Poll result set successfully",
     "details": null,
-    "timestamp": "2026-01-14T11:32:51.403875"
+    "timestamp": "2026-01-14T11:34:39.562319"
   },
   {
     "test": "Get Analytics",
     "success": true,
     "message": "Analytics retrieved successfully",
     "details": null,
-    "timestamp": "2026-01-14T11:32:51.436613"
+    "timestamp": "2026-01-14T11:34:39.601177"
   },
   {
     "test": "Invalid Admin Auth",
-    "success": false,
-    "message": "Expected 401, got 520",
+    "success": true,
+    "message": "Correctly rejected invalid token",
     "details": null,
-    "timestamp": "2026-01-14T11:32:51.470440"
+    "timestamp": "2026-01-14T11:34:39.638698"
   },
   {
     "test": "Missing Auth Header",
     "success": true,
     "message": "Correctly rejected missing auth",
     "details": null,
-    "timestamp": "2026-01-14T11:32:51.507487"
+    "timestamp": "2026-01-14T11:34:39.669082"
   }
 ]
