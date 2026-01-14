@@ -585,7 +585,8 @@ async def create_poll(poll_data: CreatePoll, current_admin: Admin = Depends(get_
     }
     await db.polls.insert_one(poll)
     
-    return poll
+    # Return without _id
+    return {k: v for k, v in poll.items() if k != '_id'}
 
 @api_router.put("/admin/polls/{poll_id}")
 async def update_poll(poll_id: str, poll_data: CreatePoll, current_admin: Admin = Depends(get_current_admin)):
