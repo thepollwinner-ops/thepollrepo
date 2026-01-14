@@ -1,0 +1,72 @@
+[
+  {
+    "test": "Admin Registration",
+    "success": true,
+    "message": "Admin registered successfully",
+    "details": null,
+    "timestamp": "2026-01-14T11:32:37.928870"
+  },
+  {
+    "test": "Admin Login",
+    "success": true,
+    "message": "Admin login successful",
+    "details": null,
+    "timestamp": "2026-01-14T11:32:38.215595"
+  },
+  {
+    "test": "Create Poll",
+    "success": false,
+    "message": "HTTP 422",
+    "details": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"options\",0,\"image_base64\"],\"msg\":\"Input should be a valid string\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/string_type\"},{\"type\":\"string_type\",\"loc\":[\"body\",\"options\",1,\"image_base64\"],\"msg\":\"Input should be a valid string\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/string_type\"},{\"type\":\"string_type\",\"loc\":[\"body\",\"options\",2,\"image_base64\"],\"msg\":\"Input should be a valid string\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.12/v/string_type\"}]}",
+    "timestamp": "2026-01-14T11:32:38.256872"
+  },
+  {
+    "test": "Get Admin Polls",
+    "success": true,
+    "message": "Retrieved 2 polls",
+    "details": null,
+    "timestamp": "2026-01-14T11:32:38.375733"
+  },
+  {
+    "test": "Get Public Polls",
+    "success": true,
+    "message": "Retrieved 2 active polls",
+    "details": null,
+    "timestamp": "2026-01-14T11:32:38.411393"
+  },
+  {
+    "test": "Get Specific Poll",
+    "success": false,
+    "message": "No poll ID available",
+    "details": null,
+    "timestamp": "2026-01-14T11:32:38.411986"
+  },
+  {
+    "test": "Set Poll Result",
+    "success": false,
+    "message": "Missing admin token or poll ID",
+    "details": null,
+    "timestamp": "2026-01-14T11:32:38.412005"
+  },
+  {
+    "test": "Get Analytics",
+    "success": true,
+    "message": "Analytics retrieved successfully",
+    "details": null,
+    "timestamp": "2026-01-14T11:32:38.517508"
+  },
+  {
+    "test": "Invalid Admin Auth",
+    "success": false,
+    "message": "Expected 401, got 520",
+    "details": null,
+    "timestamp": "2026-01-14T11:32:38.549021"
+  },
+  {
+    "test": "Missing Auth Header",
+    "success": true,
+    "message": "Correctly rejected missing auth",
+    "details": null,
+    "timestamp": "2026-01-14T11:32:38.582783"
+  }
+]
