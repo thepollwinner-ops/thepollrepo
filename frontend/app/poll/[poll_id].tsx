@@ -228,24 +228,16 @@ export default function PollDetailScreen() {
             </Text>
 
             <TouchableOpacity
-              style={styles.purchaseButton}
-              onPress={() => setShowPurchaseModal(true)}
+              style={[styles.letsVoteButton, (!selectedOption || processing) && styles.buttonDisabled]}
+              onPress={handleLetsVote}
+              disabled={!selectedOption || processing}
             >
-              <Ionicons name="cart" size={20} color="#fff" />
-              <Text style={styles.buttonText}>Purchase Votes</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.voteButton, voting && styles.buttonDisabled]}
-              onPress={handleVote}
-              disabled={voting || !selectedOption}
-            >
-              {voting ? (
+              {processing ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <>
                   <Ionicons name="checkmark-circle" size={20} color="#fff" />
-                  <Text style={styles.buttonText}>Cast Vote</Text>
+                  <Text style={styles.buttonText}>Let's Vote</Text>
                 </>
               )}
             </TouchableOpacity>
