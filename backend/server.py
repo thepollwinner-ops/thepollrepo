@@ -216,9 +216,9 @@ async def get_current_admin(request: Request) -> Optional[Admin]:
         admin_id = payload.get("admin_id")
         if not admin_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    except jwt.ExpiredSignatureError:
+    except ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
-    except jwt.JWTError:
+    except InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     
     admin_doc = await db.admins.find_one({"admin_id": admin_id}, {"_id": 0})
