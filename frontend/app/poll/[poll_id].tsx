@@ -444,6 +444,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
+  letsVoteButton: {
+    flexDirection: 'row',
+    backgroundColor: '#6366f1',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   voteButton: {
     flexDirection: 'row',
     backgroundColor: '#6366f1',
