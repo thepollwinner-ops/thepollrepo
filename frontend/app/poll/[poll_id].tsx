@@ -64,7 +64,12 @@ export default function PollDetailScreen() {
     }
   };
 
-  const handlePurchaseVotes = async () => {
+  const handleLetsVote = async () => {
+    if (!selectedOption) {
+      Alert.alert('Error', 'Please select an option first');
+      return;
+    }
+
     const count = parseInt(voteCount);
     if (isNaN(count) || count <= 0) {
       Alert.alert('Error', 'Please enter valid vote count');
@@ -73,67 +78,60 @@ export default function PollDetailScreen() {
 
     if (!poll) return;
 
+    setShowVoteModal(true);
+  };
+
+  const confirmVote = async () => {
+    const count = parseInt(voteCount);
+    
     try {
-      setPurchasing(true);
-      const response = await axios.post(
+      setProcessing(true);
+      
+      // Step 1: Purchase votes (initiate payment)
+      const purchaseResponse = await axios.post(
         `${BACKEND_URL}/api/polls/${poll_id}/purchase`,
         { poll_id, vote_count: count },
         { withCredentials: true }
       );
 
-      const { payment_session_id } = response.data;
-      
-      // For test mode, simulate immediate success
+      // For test mode, simulate payment success
       Alert.alert(
-        'Payment Required',
-        `Amount: ₹${count * poll.price_per_vote}\n\nIn test mode, payment would open Cashfree gateway. For now, votes are pending payment confirmation.`,
+        'Payment Initiated',
+        `Amount: ₹${count * poll!.price_per_vote}\n\nIn production, Cashfree payment gateway would open. For testing, we'll simulate success.`,
         [
           {
-            text: 'OK',
-            onPress: () => {
-              setShowPurchaseModal(false);
-              Alert.alert('Success', 'Votes purchased! You can now cast your votes.');
+            text: 'Simulate Success',
+            onPress: async () => {
+              try {
+                // Step 2: Cast vote after payment success
+                await axios.post(
+                  `${BACKEND_URL}/api/polls/${poll_id}/vote`,
+                  { option_id: selectedOption, vote_count: count },
+                  { withCredentials: true }
+                );
+
+                setShowVoteModal(false);
+                Alert.alert('Success! 🎉', 'Your vote has been cast successfully!', [
+                  {
+                    text: 'OK',
+                    onPress: () => router.back(),
+                  },
+                ]);
+              } catch (error: any) {
+                Alert.alert('Error', error.response?.data?.detail || 'Voting failed');
+              }
             },
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
           },
         ]
       );
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.detail || 'Purchase failed');
+      Alert.alert('Error', error.response?.data?.detail || 'Process failed');
     } finally {
-      setPurchasing(false);
-    }
-  };
-
-  const handleVote = async () => {
-    if (!selectedOption) {
-      Alert.alert('Error', 'Please select an option');
-      return;
-    }
-
-    const count = parseInt(voteCount);
-    if (isNaN(count) || count <= 0) {
-      Alert.alert('Error', 'Please enter valid vote count');
-      return;
-    }
-
-    try {
-      setVoting(true);
-      await axios.post(
-        `${BACKEND_URL}/api/polls/${poll_id}/vote`,
-        { option_id: selectedOption, vote_count: count },
-        { withCredentials: true }
-      );
-
-      Alert.alert('Success', 'Vote cast successfully!', [
-        {
-          text: 'OK',
-          onPress: () => router.back(),
-        },
-      ]);
-    } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.detail || 'Voting failed');
-    } finally {
-      setVoting(false);
+      setProcessing(false);
     }
   };
 
