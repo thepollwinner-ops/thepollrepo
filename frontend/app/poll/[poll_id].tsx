@@ -246,37 +246,40 @@ export default function PollDetailScreen() {
       </ScrollView>
 
       <Modal
-        visible={showPurchaseModal}
+        visible={showVoteModal}
         animationType="slide"
         transparent
-        onRequestClose={() => setShowPurchaseModal(false)}
+        onRequestClose={() => setShowVoteModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Purchase Votes</Text>
-              <TouchableOpacity onPress={() => setShowPurchaseModal(false)}>
+              <Text style={styles.modalTitle}>Confirm Your Vote</Text>
+              <TouchableOpacity onPress={() => setShowVoteModal(false)}>
                 <Ionicons name="close" size={24} color="#64748b" />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.purchaseDetails}>
-              <Text style={styles.detailText}>Poll: {poll.title}</Text>
-              <Text style={styles.detailText}>Votes: {voteCount}</Text>
+            <View style={styles.voteDetails}>
+              <Text style={styles.detailText}>📊 Poll: {poll.title}</Text>
               <Text style={styles.detailText}>
-                Amount: ₹{(parseInt(voteCount) || 0) * poll.price_per_vote}
+                ✅ Your Choice: {poll.options.find(o => o.option_id === selectedOption)?.text}
+              </Text>
+              <Text style={styles.detailText}>🗳️ Votes: {voteCount}</Text>
+              <Text style={styles.detailText}>
+                💰 Amount: ₹{(parseInt(voteCount) || 0) * poll.price_per_vote}
               </Text>
             </View>
 
             <TouchableOpacity
-              style={[styles.confirmButton, purchasing && styles.buttonDisabled]}
-              onPress={handlePurchaseVotes}
-              disabled={purchasing}
+              style={[styles.confirmButton, processing && styles.buttonDisabled]}
+              onPress={confirmVote}
+              disabled={processing}
             >
-              {purchasing ? (
+              {processing ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Proceed to Payment</Text>
+                <Text style={styles.buttonText}>Confirm & Pay</Text>
               )}
             </TouchableOpacity>
           </View>
