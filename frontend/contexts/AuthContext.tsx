@@ -88,25 +88,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async () => {
+  const login = async (email: string, password: string, name?: string, isLogin: boolean = true) => {
     try {
-      const redirectUrl = Platform.OS === 'web'
-        ? `${BACKEND_URL}/`
-        : Linking.createURL('/');
+      setLoading(true);
       
-      const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
-
-      if (Platform.OS === 'web') {
-        window.location.href = authUrl;
-      } else {
-        const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
-        
-        if (result.type === 'success' && result.url) {
-          handleDeepLink({ url: result.url });
-        }
-      }
-    } catch (error) {
-      console.error('Login error:', error);
+      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const payload = isLogin 
+        ? { email, password }
+        : { email, password, name };
+      
+      const response = await axios.post(`${BACKEND_URL}${endpoint}`, payload, {
+        withCredentials: true,
+      });
+      
+      setUser(response.data);
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      throw new Error(error.response?.data?.detail || 'Authentication failed');
+    } finally {
+      setLoading(false);
     }
   };
 
