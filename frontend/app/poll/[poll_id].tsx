@@ -35,7 +35,7 @@ interface Poll {
 }
 
 export default function PollDetailScreen() {
-  const { poll_id } = useLocalSearchParams();
+  const params = useLocalSearchParams<{ poll_id: string }>();
   const router = useRouter();
   const { user } = useAuth();
   
@@ -47,12 +47,17 @@ export default function PollDetailScreen() {
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
-    if (poll_id) {
-      fetchPoll();
+    const pollId = Array.isArray(params.poll_id) ? params.poll_id[0] : params.poll_id;
+    console.log('Poll ID from params:', pollId);
+    if (pollId) {
+      fetchPoll(pollId);
+    } else {
+      setLoading(false);
+      Alert.alert('Error', 'Poll ID not found');
     }
-  }, [poll_id]);
+  }, [params.poll_id]);
 
-  const fetchPoll = async () => {
+  const fetchPoll = async (pollId: string) => {
     try {
       console.log('Fetching poll with ID:', poll_id);
       console.log('Backend URL:', BACKEND_URL);
