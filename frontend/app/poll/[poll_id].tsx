@@ -91,14 +91,15 @@ export default function PollDetailScreen() {
 
   const confirmVote = async () => {
     const count = parseInt(voteCount);
+    const pollId = Array.isArray(params.poll_id) ? params.poll_id[0] : params.poll_id;
     
     try {
       setProcessing(true);
       
       // Step 1: Purchase votes (initiate payment)
       const purchaseResponse = await axios.post(
-        `${BACKEND_URL}/api/polls/${poll_id}/purchase`,
-        { poll_id, vote_count: count },
+        `${BACKEND_URL}/api/polls/${pollId}/purchase`,
+        { poll_id: pollId, vote_count: count },
         { withCredentials: true }
       );
 
@@ -113,7 +114,7 @@ export default function PollDetailScreen() {
               try {
                 // Step 2: Cast vote after payment success
                 await axios.post(
-                  `${BACKEND_URL}/api/polls/${poll_id}/vote`,
+                  `${BACKEND_URL}/api/polls/${pollId}/vote`,
                   { option_id: selectedOption, vote_count: count },
                   { withCredentials: true }
                 );
