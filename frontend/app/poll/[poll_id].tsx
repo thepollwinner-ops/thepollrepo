@@ -54,13 +54,16 @@ export default function PollDetailScreen() {
 
   const fetchPoll = async () => {
     try {
+      console.log('Fetching poll with ID:', poll_id);
+      console.log('Backend URL:', BACKEND_URL);
       const response = await axios.get(`${BACKEND_URL}/api/polls/${poll_id}`);
+      console.log('Poll data received:', response.data);
       setPoll(response.data);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching poll:', error);
-      Alert.alert('Error', 'Failed to load poll');
-    } finally {
       setLoading(false);
+      Alert.alert('Error', 'Failed to load poll');
     }
   };
 
