@@ -59,9 +59,9 @@ export default function PollDetailScreen() {
 
   const fetchPoll = async (pollId: string) => {
     try {
-      console.log('Fetching poll with ID:', poll_id);
+      console.log('Fetching poll with ID:', pollId);
       console.log('Backend URL:', BACKEND_URL);
-      const response = await axios.get(`${BACKEND_URL}/api/polls/${poll_id}`);
+      const response = await axios.get(`${BACKEND_URL}/api/polls/${pollId}`);
       console.log('Poll data received:', response.data);
       setPoll(response.data);
       setLoading(false);
