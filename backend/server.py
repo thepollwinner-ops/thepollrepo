@@ -238,6 +238,90 @@ async def get_current_admin(request: Request) -> Optional[Admin]:
 
 # ============= AUTH ROUTES =============
 
+@api_router.post("/auth/register")
+async def user_register(user_data: UserRegister, response: Response):
+    """Register new user with email/password"""
+    # Check if user exists
+    existing = await db.users.find_one({"email": user_data.email}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+    
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    new_user = {
+        "user_id": user_id,
+        "email": user_data.email,
+        "name": user_data.name,
+        "password_hash": hash_password(user_data.password),
+        "picture": None,
+        "upi_id": None,
+        "created_at": datetime.now(timezone.utc)
+    }
+    await db.users.insert_one(new_user)
+    
+    # Create wallet
+    wallet = {
+        "wallet_id": f"wallet_{uuid.uuid4().hex[:12]}",
+        "user_id": user_id,
+        "balance": 0.0,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    await db.wallets.insert_one(wallet)
+    
+    # Create session
+    session_token = f"session_{uuid.uuid4().hex}"
+    session_doc = {
+        "user_id": user_id,
+        "session_token": session_token,
+        "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+        "created_at": datetime.now(timezone.utc)
+    }
+    await db.user_sessions.insert_one(session_doc)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7 * 24 * 60 * 60,
+        path="/"
+    )
+    
+    user_doc = await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0})
+    return user_doc
+
+@api_router.post("/auth/login")
+async def user_login(login_data: UserLogin, response: Response):
+    """User login with email/password"""
+    user = await db.users.find_one({"email": login_data.email})
+    if not user or not verify_password(login_data.password, user["password_hash"]):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    
+    # Create session
+    session_token = f"session_{uuid.uuid4().hex}"
+    session_doc = {
+        "user_id": user["user_id"],
+        "session_token": session_token,
+        "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+        "created_at": datetime.now(timezone.utc)
+    }
+    await db.user_sessions.insert_one(session_doc)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7 * 24 * 60 * 60,
+        path="/"
+    )
+    
+    user_doc = await db.users.find_one({"user_id": user["user_id"]}, {"_id": 0, "password_hash": 0})
+    return user_doc
+
 @api_router.post("/auth/google/session")
 async def google_auth_session(request: Request, response: Response):
     """Exchange session_id for user data using Emergent Auth"""
