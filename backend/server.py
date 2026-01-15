@@ -81,6 +81,15 @@ class AdminLogin(BaseModel):
     email: str
     password: str
 
+class UserRegister(BaseModel):
+    email: str
+    password: str
+    name: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
 class PollOption(BaseModel):
     option_id: str
     text: str
