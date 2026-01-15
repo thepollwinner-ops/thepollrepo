@@ -93,9 +93,17 @@ export default function PollDetailScreen() {
     const count = parseInt(voteCount);
     const pollId = Array.isArray(params.poll_id) ? params.poll_id[0] : params.poll_id;
     
+    console.log('Starting vote process...', { pollId, count, selectedOption });
+    
+    if (!selectedOption) {
+      Alert.alert('Error', 'Please select an option');
+      return;
+    }
+
     try {
       setProcessing(true);
       
+      console.log('Initiating purchase...');
       // Step 1: Purchase votes (initiate payment)
       const purchaseResponse = await axios.post(
         `${BACKEND_URL}/api/polls/${pollId}/purchase`,
@@ -103,44 +111,34 @@ export default function PollDetailScreen() {
         { withCredentials: true }
       );
 
-      // For test mode, simulate payment success
-      Alert.alert(
-        'Payment Initiated',
-        `Amount: ₹${count * poll!.price_per_vote}\n\nIn production, Cashfree payment gateway would open. For testing, we'll simulate success.`,
-        [
-          {
-            text: 'Simulate Success',
-            onPress: async () => {
-              try {
-                // Step 2: Cast vote after payment success
-                await axios.post(
-                  `${BACKEND_URL}/api/polls/${pollId}/vote`,
-                  { option_id: selectedOption, vote_count: count },
-                  { withCredentials: true }
-                );
+      console.log('Purchase response:', purchaseResponse.data);
 
-                setShowVoteModal(false);
-                Alert.alert('Success! 🎉', 'Your vote has been cast successfully!', [
-                  {
-                    text: 'OK',
-                    onPress: () => router.back(),
-                  },
-                ]);
-              } catch (error: any) {
-                Alert.alert('Error', error.response?.data?.detail || 'Voting failed');
-              }
-            },
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-        ]
+      // Step 2: Cast vote immediately (simulating successful payment for testing)
+      console.log('Casting vote...');
+      const voteResponse = await axios.post(
+        `${BACKEND_URL}/api/polls/${pollId}/vote`,
+        { option_id: selectedOption, vote_count: count },
+        { withCredentials: true }
       );
-    } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.detail || 'Process failed');
-    } finally {
+
+      console.log('Vote response:', voteResponse.data);
+
+      setShowVoteModal(false);
       setProcessing(false);
+      
+      Alert.alert('Success! 🎉', 'Your vote has been cast successfully!', [
+        {
+          text: 'OK',
+          onPress: () => router.back(),
+        },
+      ]);
+    } catch (error: any) {
+      console.error('Vote process error:', error);
+      console.error('Error details:', error.response?.data);
+      setProcessing(false);
+      
+      const errorMessage = error.response?.data?.detail || error.message || 'Process failed';
+      Alert.alert('Error', errorMessage);
     }
   };
 
