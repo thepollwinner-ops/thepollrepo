@@ -507,7 +507,11 @@ Option 3</textarea>
                         <td><strong>₹${(stats.total_amount || 0).toFixed(2)}</strong></td>
                         <td>
                             <button class="btn-small info" onclick="viewPollStats('${poll.poll_id}')">📊 Stats</button>
-                            ${poll.status === 'active' ? `<button class="btn-small" onclick="setResult('${poll.poll_id}', ${JSON.stringify(poll.options).replace(/"/g, '&quot;')})">🏆 Set Result</button>` : '<span class="badge badge-info">Closed</span>'}
+                            ${poll.status === 'active' ? `
+                                <button class="btn-small primary" onclick="editPoll('${poll.poll_id}')">✏️ Edit</button>
+                                <button class="btn-small" onclick="setResult('${poll.poll_id}', ${JSON.stringify(poll.options).replace(/"/g, '&quot;')})">🏆 Set Result</button>
+                                ${stats.total_votes === 0 ? `<button class="btn-small danger" onclick="deletePoll('${poll.poll_id}')">🗑️ Delete</button>` : ''}
+                            ` : '<span class="badge badge-info">Closed</span>'}
                         </td>
                     `;
                     tbody.appendChild(row);
