@@ -898,12 +898,30 @@ async def payment_webhook(request: Request):
 
 app.include_router(api_router)
 
-# Mount admin panel static files
+# Serve admin panel with proper SPA fallback
+@app.get("/admin/{full_path:path}")
+async def serve_admin(full_path: str):
+    """Serve admin panel with SPA routing support"""
+    admin_build_path = Path("/app/admin-panel/build")
+    
+    # Check if requested file exists
+    file_path = admin_build_path / full_path
+    if file_path.is_file():
+        return FileResponse(file_path)
+    
+    # For all other routes, serve index.html (SPA fallback)
+    index_path = admin_build_path / "index.html"
+    if index_path.is_file():
+        return FileResponse(index_path)
+    
+    raise HTTPException(status_code=404, detail="Admin panel not found")
+
+# Mount static files for admin panel assets
 try:
-    app.mount("/admin", StaticFiles(directory="/app/admin-panel/build", html=True), name="admin")
-    logger.info("Admin panel mounted at /admin")
+    app.mount("/admin/static", StaticFiles(directory="/app/admin-panel/build/static"), name="admin-static")
+    logger.info("Admin panel static files mounted")
 except Exception as e:
-    logger.warning(f"Could not mount admin panel: {e}")
+    logger.warning(f"Could not mount admin static files: {e}")
 
 app.add_middleware(
     CORSMiddleware,
