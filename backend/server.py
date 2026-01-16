@@ -496,8 +496,8 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, current_us
                 "customer_name": current_user.name
             },
             "order_meta": {
-                "return_url": "https://poll-winner.preview.emergentagent.com/?payment=success",
-                "notify_url": f"https://poll-winner.preview.emergentagent.com/api/payments/webhook"
+                "return_url": "https://pollwinner-1.preview.emergentagent.com/?payment=success",
+                "notify_url": f"https://pollwinner-1.preview.emergentagent.com/api/payments/webhook"
             }
         }
         
