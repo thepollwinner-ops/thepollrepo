@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poll Winner - Admin Panel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f8fafc;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .login-form {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 50px auto;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn:hover { background: #4f46e5; }
+        .error { color: #ef4444; margin-bottom: 15px; }
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 { color: #64748b; font-size: 14px; margin-bottom: 8px; }
+        .stat-card p { font-size: 32px; font-weight: bold; color: #1e293b; }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        table th { background: #f8fafc; font-weight: 600; color: #475569; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .btn-small {
+            padding: 6px 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .btn-small.danger { background: #ef4444; }
+        .hidden { display: none; }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .tab.active { background: #6366f1; color: white; }
+    </style>
+</head>
+<body>
+    <div id="loginSection" class="login-form">
+        <h2 style="text-align: center; margin-bottom: 30px;">🏆 Admin Login</h2>
+        <div id="loginError" class="error hidden"></div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" value="admin@pollwinner.com" />
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" value="admin123" />
+        </div>
+        <button class="btn" onclick="login()">Login</button>
+    </div>
+
+    <div id="adminSection" class="container hidden">
+        <div class="header">
+            <h1>🏆 Poll Winner - Admin Panel</h1>
+            <p>Manage polls, users, and withdrawals</p>
+            <button class="btn" onclick="logout()" style="max-width: 150px; margin-top: 15px;">Logout</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="tab" onclick="showTab('polls')">Polls</button>
+            <button class="tab" onclick="showTab('createPoll')">Create Poll</button>
+            <button class="tab" onclick="showTab('withdrawals')">Withdrawals</button>
+        </div>
+
+        <div id="dashboardTab">
+            <div class="stats" id="stats"></div>
+        </div>
+
+        <div id="pollsTab" class="hidden">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Manage Polls</h2>
+                <table id="pollsTable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Price</th>
+                            <th>Options</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="createPollTab" class="hidden">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Create New Poll</h2>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="pollTitle" placeholder="Which team will win?" />
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="pollDesc" placeholder="Vote for your favorite" />
+                </div>
+                <div class="form-group">
+                    <label>Price per Vote (₹)</label>
+                    <input type="number" id="pollPrice" value="1" />
+                </div>
+                <div class="form-group">
+                    <label>Options (one per line)</label>
+                    <textarea id="pollOptions" rows="5" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px;">Option 1\nOption 2\nOption 3</textarea>
+                </div>
+                <button class="btn" onclick="createPoll()">Create Poll</button>
+            </div>
+        </div>
+
+        <div id="withdrawalsTab" class="hidden">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Withdrawal Requests</h2>
+                <table id="withdrawalsTable">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Amount</th>
+                            <th>Fee</th>
+                            <th>Net Amount</th>
+                            <th>UPI ID</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://poll-winner.preview.emergentagent.com/api';
+        let token = localStorage.getItem('admin_token');
+
+        if (token) {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.remove('hidden');
+            loadDashboard();
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    token = data.access_token;
+                    localStorage.setItem('admin_token', token);
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('adminSection').classList.remove('hidden');
+                    loadDashboard();
+                } else {
+                    document.getElementById('loginError').textContent = data.detail || 'Login failed';
+                    document.getElementById('loginError').classList.remove('hidden');
+                }
+            } catch (error) {
+                document.getElementById('loginError').textContent = 'Connection error';
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            token = null;
+            localStorage.removeItem('admin_token');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('[id$="Tab"]').forEach(t => t.classList.add('hidden'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            if (tabName === 'polls') loadPolls();
+            if (tabName === 'withdrawals') loadWithdrawals();
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_URL}/admin/analytics`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                document.getElementById('stats').innerHTML = `
+                    <div class="stat-card">
+                        <h3>Total Users</h3>
+                        <p>${data.total_users || 0}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Polls</h3>
+                        <p>${data.total_polls || 0}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Polls</h3>
+                        <p>${data.active_polls || 0}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pending Withdrawals</h3>
+                        <p>${data.pending_withdrawals || 0}</p>
+                    </div>
+                `;
+                
+                loadPolls();
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        async function loadPolls() {
+            try {
+                const response = await fetch(`${API_URL}/admin/polls`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const polls = await response.json();
+                
+                const tbody = document.querySelector('#pollsTable tbody');
+                tbody.innerHTML = polls.map(poll => `
+                    <tr>
+                        <td><strong>${poll.title}</strong></td>
+                        <td><span class="badge ${poll.status === 'active' ? 'badge-success' : 'badge-danger'}">${poll.status}</span></td>
+                        <td>₹${poll.price_per_vote}</td>
+                        <td>${poll.options.length} options</td>
+                        <td>
+                            ${poll.status === 'active' ? `<button class="btn-small" onclick="setResult('${poll.poll_id}', ${JSON.stringify(poll.options).replace(/"/g, '&quot;')})">Set Result</button>` : 'Closed'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading polls:', error);
+            }
+        }
+
+        async function createPoll() {
+            const title = document.getElementById('pollTitle').value;
+            const description = document.getElementById('pollDesc').value;
+            const price = parseFloat(document.getElementById('pollPrice').value);
+            const optionsText = document.getElementById('pollOptions').value;
+            const options = optionsText.split('\n').filter(o => o.trim()).map(text => ({ text: text.trim() }));
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/polls`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, description, price_per_vote: price, options })
+                });
+                
+                if (response.ok) {
+                    alert('Poll created successfully!');
+                    document.getElementById('pollTitle').value = '';
+                    document.getElementById('pollDesc').value = '';
+                    document.getElementById('pollOptions').value = 'Option 1\nOption 2\nOption 3';
+                    showTab('polls');
+                } else {
+                    alert('Failed to create poll');
+                }
+            } catch (error) {
+                alert('Error creating poll');
+            }
+        }
+
+        async function setResult(pollId, options) {
+            const optionsList = options.map((o, i) => `${i + 1}. ${o.text}`).join('\n');
+            const choice = prompt(`Select winning option:\n\n${optionsList}\n\nEnter option number:`);
+            
+            if (choice && parseInt(choice) > 0 && parseInt(choice) <= options.length) {
+                const winningOption = options[parseInt(choice) - 1];
+                
+                try {
+                    const response = await fetch(`${API_URL}/admin/polls/${pollId}/result`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ winning_option_id: winningOption.option_id })
+                    });
+                    
+                    if (response.ok) {
+                        alert('Result set successfully! Winnings distributed.');
+                        loadPolls();
+                    } else {
+                        alert('Failed to set result');
+                    }
+                } catch (error) {
+                    alert('Error setting result');
+                }
+            }
+        }
+
+        async function loadWithdrawals() {
+            try {
+                const response = await fetch(`${API_URL}/admin/withdrawals`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const withdrawals = await response.json();
+                
+                const tbody = document.querySelector('#withdrawalsTable tbody');
+                tbody.innerHTML = withdrawals.map(w => `
+                    <tr>
+                        <td><code>${w.user_id}</code></td>
+                        <td>₹${w.amount.toFixed(2)}</td>
+                        <td>₹${w.fee.toFixed(2)}</td>
+                        <td><strong>₹${w.net_amount.toFixed(2)}</strong></td>
+                        <td><code>${w.upi_id}</code></td>
+                        <td><span class="badge ${w.status === 'pending' ? 'badge-warning' : w.status === 'approved' ? 'badge-success' : 'badge-danger'}">${w.status}</span></td>
+                        <td>
+                            ${w.status === 'pending' ? `
+                                <button class="btn-small" onclick="approveWithdrawal('${w.withdrawal_id}')">Approve</button>
+                                <button class="btn-small danger" onclick="rejectWithdrawal('${w.withdrawal_id}')">Reject</button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading withdrawals:', error);
+            }
+        }
+
+        async function approveWithdrawal(id) {
+            if (!confirm('Approve this withdrawal?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/withdrawals/${id}/approve`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    alert('Withdrawal approved! Send money to user\'s UPI manually.');
+                    loadWithdrawals();
+                } else {
+                    alert('Failed to approve');
+                }
+            } catch (error) {
+                alert('Error approving withdrawal');
+            }
+        }
+
+        async function rejectWithdrawal(id) {
+            const notes = prompt('Reason for rejection:');
+            if (!notes) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/withdrawals/${id}/reject?notes=${encodeURIComponent(notes)}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    alert('Withdrawal rejected');
+                    loadWithdrawals();
+                } else {
+                    alert('Failed to reject');
+                }
+            } catch (error) {
+                alert('Error rejecting withdrawal');
+            }
+        }
+    </script>
+</body>
+</html>
