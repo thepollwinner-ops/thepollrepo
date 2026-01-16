@@ -112,26 +112,87 @@ export default function PollDetailScreen() {
       );
 
       console.log('Purchase response:', purchaseResponse.data);
-
-      // Step 2: Cast vote immediately (simulating successful payment for testing)
-      console.log('Casting vote...');
-      const voteResponse = await axios.post(
-        `${BACKEND_URL}/api/polls/${pollId}/vote`,
-        { option_id: selectedOption, vote_count: count },
-        { withCredentials: true }
-      );
-
-      console.log('Vote response:', voteResponse.data);
-
-      setShowVoteModal(false);
-      setProcessing(false);
       
-      Alert.alert('Success! 🎉', 'Your vote has been cast successfully!', [
-        {
-          text: 'OK',
-          onPress: () => router.back(),
-        },
-      ]);
+      const { payment_url, status, message } = purchaseResponse.data;
+
+      // If payment is auto-approved (testing mode)
+      if (status === 'success') {
+        // Step 2: Cast vote immediately
+        console.log('Casting vote...');
+        const voteResponse = await axios.post(
+          `${BACKEND_URL}/api/polls/${pollId}/vote`,
+          { option_id: selectedOption, vote_count: count },
+          { withCredentials: true }
+        );
+
+        console.log('Vote response:', voteResponse.data);
+
+        setShowVoteModal(false);
+        setProcessing(false);
+        
+        Alert.alert('Success! 🎉', message || 'Your vote has been cast successfully!', [
+          {
+            text: 'OK',
+            onPress: () => router.back(),
+          },
+        ]);
+        return;
+      }
+
+      // If payment URL is provided, open Cashfree payment gateway
+      if (payment_url) {
+        setShowVoteModal(false);
+        setProcessing(false);
+
+        // Open payment URL in browser
+        const result = await WebBrowser.openBrowserAsync(payment_url);
+        
+        if (result.type === 'dismiss' || result.type === 'cancel') {
+          Alert.alert(
+            'Payment Status',
+            'Payment window was closed. If payment was successful, your votes will be available shortly.',
+            [
+              {
+                text: 'OK',
+                onPress: () => router.back(),
+              },
+            ]
+          );
+        }
+      } else {
+        // No payment URL, show message and allow voting
+        setShowVoteModal(false);
+        
+        Alert.alert(
+          'Payment Processing',
+          message || 'Payment is being processed. You can now cast your vote.',
+          [
+            {
+              text: 'Cast Vote',
+              onPress: async () => {
+                try {
+                  await axios.post(
+                    `${BACKEND_URL}/api/polls/${pollId}/vote`,
+                    { option_id: selectedOption, vote_count: count },
+                    { withCredentials: true }
+                  );
+                  
+                  Alert.alert('Success! 🎉', 'Your vote has been cast!', [
+                    { text: 'OK', onPress: () => router.back() },
+                  ]);
+                } catch (error: any) {
+                  Alert.alert('Error', error.response?.data?.detail || 'Voting failed');
+                }
+              },
+            },
+            {
+              text: 'Cancel',
+              style: 'cancel',
+              onPress: () => router.back(),
+            },
+          ]
+        );
+      }
     } catch (error: any) {
       console.error('Vote process error:', error);
       console.error('Error details:', error.response?.data);
