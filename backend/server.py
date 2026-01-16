@@ -896,32 +896,32 @@ async def payment_webhook(request: Request):
 
 # ============= INCLUDE ROUTER =============
 
-app.include_router(api_router)
+# Serve admin panel BEFORE API routes to avoid conflicts
+@app.get("/admin")
+async def serve_admin_root():
+    """Redirect /admin to /admin/"""
+    return FileResponse("/app/admin-panel/build/index.html", media_type="text/html")
 
-# Serve admin panel with proper SPA fallback
-@app.get("/admin/{full_path:path}")
-async def serve_admin(full_path: str):
-    """Serve admin panel with SPA routing support"""
-    admin_build_path = Path("/app/admin-panel/build")
-    
-    # Check if requested file exists
-    file_path = admin_build_path / full_path
-    if file_path.is_file():
-        return FileResponse(file_path)
-    
-    # For all other routes, serve index.html (SPA fallback)
-    index_path = admin_build_path / "index.html"
-    if index_path.is_file():
-        return FileResponse(index_path)
-    
-    raise HTTPException(status_code=404, detail="Admin panel not found")
+@app.get("/admin/")
+async def serve_admin_index():
+    """Serve admin panel index"""
+    return FileResponse("/app/admin-panel/build/index.html", media_type="text/html")
 
-# Mount static files for admin panel assets
+# Mount static files for admin panel assets BEFORE dynamic route
 try:
     app.mount("/admin/static", StaticFiles(directory="/app/admin-panel/build/static"), name="admin-static")
     logger.info("Admin panel static files mounted")
 except Exception as e:
     logger.warning(f"Could not mount admin static files: {e}")
+
+@app.get("/admin/{full_path:path}")
+async def serve_admin_spa(full_path: str):
+    """Serve admin panel with SPA routing support"""
+    # For all admin routes, serve index.html (SPA fallback)
+    return FileResponse("/app/admin-panel/build/index.html", media_type="text/html")
+
+# Now include API router
+app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
