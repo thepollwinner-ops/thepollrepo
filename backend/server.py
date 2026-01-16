@@ -40,6 +40,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # Create the main app
 app = FastAPI()
 
+# Serve admin panel directly on app (before routers)
+@app.get("/api/admin-panel", include_in_schema=False)
+async def serve_admin_panel_route():
+    """Serve admin panel HTML - must be before API router"""
+    return FileResponse("/app/admin-panel/build/admin.html", media_type="text/html")
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
