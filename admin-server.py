@@ -4,7 +4,7 @@ import socketserver
 import os
 from pathlib import Path
 
-PORT = 3002
+PORT = 5000
 DIRECTORY = "/app/admin-panel/build"
 
 class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
