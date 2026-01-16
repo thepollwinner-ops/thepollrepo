@@ -401,6 +401,12 @@ export default function PollDetailScreen() {
           </View>
         )}
 
+        {/* User's personal result for closed polls */}
+        {renderMyResult()}
+
+        {/* Poll results for closed polls */}
+        {renderResultsSection()}
+
         <View style={styles.optionsSection}>
           <Text style={styles.sectionTitle}>Select Your Choice</Text>
           {poll.options.map((option) => (
