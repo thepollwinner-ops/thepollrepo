@@ -246,3 +246,5 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: "Completed comprehensive backend API testing for Poll Winner application. All 10 critical backend endpoints tested successfully. Fixed JWT authentication issue during testing. All admin authentication, poll management, and public endpoints are working correctly. Winner calculation logic and analytics are functional. No major issues found - application backend is ready for production use."
+  - agent: "main"
+    message: "Fixed Cashfree payment integration. Changed from Orders API to Payment Links API which returns a direct payment_url. The payment flow now generates a working Cashfree payment page URL. Need to test the full user flow - register/login, select poll, select option, confirm payment, and verify the payment URL opens correctly in the browser."
