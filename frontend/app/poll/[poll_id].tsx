@@ -739,4 +739,140 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
+  // Results Section Styles
+  resultsSection: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginTop: 16,
+    borderRadius: 12,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  statBox: {
+    backgroundColor: '#f8fafc',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    minWidth: 120,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 4,
+  },
+  resultOption: {
+    marginBottom: 16,
+  },
+  resultOptionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  resultOptionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#475569',
+    flex: 1,
+  },
+  winnerText: {
+    color: '#059669',
+    fontWeight: '700',
+  },
+  resultVotes: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  progressBar: {
+    height: 20,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#6366f1',
+    borderRadius: 10,
+  },
+  winnerFill: {
+    backgroundColor: '#10b981',
+  },
+  percentageText: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 2,
+    textAlign: 'right',
+  },
+  // My Result Styles
+  myResultSection: {
+    padding: 16,
+    marginTop: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+  },
+  winnerResult: {
+    backgroundColor: '#ecfdf5',
+    borderColor: '#10b981',
+  },
+  loserResult: {
+    backgroundColor: '#fef2f2',
+    borderColor: '#ef4444',
+  },
+  myResultTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 16,
+    color: '#1e293b',
+  },
+  myResultStats: {
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    padding: 12,
+    borderRadius: 8,
+  },
+  myResultRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  myResultLabel: {
+    fontSize: 14,
+    color: '#475569',
+  },
+  myResultValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  winningAmount: {
+    color: '#059669',
+    fontSize: 16,
+  },
+  votedOptionsSection: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  votedOptionsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#475569',
+    marginBottom: 8,
+  },
+  votedOption: {
+    fontSize: 13,
+    color: '#64748b',
+    marginBottom: 4,
+  },
 });
