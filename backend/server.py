@@ -809,6 +809,29 @@ async def update_poll(poll_id: str, poll_data: CreatePoll, current_admin: Admin 
     
     return {"message": "Poll updated successfully"}
 
+@api_router.delete("/admin/polls/{poll_id}")
+async def delete_poll(poll_id: str, current_admin: Admin = Depends(get_current_admin)):
+    """Delete poll (admin only) - only if no votes have been cast"""
+    poll = await db.polls.find_one({"poll_id": poll_id})
+    if not poll:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found")
+    
+    # Check if any votes have been cast
+    vote_count = await db.votes.count_documents({"poll_id": poll_id})
+    if vote_count > 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail=f"Cannot delete poll with {vote_count} votes. Set result first to close the poll."
+        )
+    
+    # Delete the poll
+    await db.polls.delete_one({"poll_id": poll_id})
+    
+    # Delete any related transactions
+    await db.transactions.delete_many({"poll_id": poll_id})
+    
+    return {"message": "Poll deleted successfully"}
+
 @api_router.post("/admin/polls/{poll_id}/result")
 async def set_poll_result(poll_id: str, result_data: SetResultRequest, current_admin: Admin = Depends(get_current_admin)):
     """Set poll result and distribute winnings (admin only)"""
