@@ -277,6 +277,96 @@ export default function PollDetailScreen() {
 
   const winningOption = poll.options.find(opt => opt.option_id === poll.result_option_id);
 
+  // Render results section for closed polls
+  const renderResultsSection = () => {
+    if (poll.status !== 'closed' || !pollResults) return null;
+
+    return (
+      <View style={styles.resultsSection}>
+        <Text style={styles.sectionTitle}>📊 Poll Results</Text>
+        
+        {/* Overall Stats */}
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>{pollResults.total_votes}</Text>
+            <Text style={styles.statLabel}>Total Votes</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statValue}>₹{pollResults.total_amount}</Text>
+            <Text style={styles.statLabel}>Total Pool</Text>
+          </View>
+        </View>
+
+        {/* Option Results with Progress Bars */}
+        {pollResults.option_results.map((option) => (
+          <View key={option.option_id} style={styles.resultOption}>
+            <View style={styles.resultOptionHeader}>
+              <Text style={[styles.resultOptionText, option.is_winner && styles.winnerText]}>
+                {option.is_winner ? '🏆 ' : ''}{option.text}
+              </Text>
+              <Text style={styles.resultVotes}>{option.vote_count} votes</Text>
+            </View>
+            <View style={styles.progressBar}>
+              <View 
+                style={[
+                  styles.progressFill, 
+                  { width: `${option.percentage}%` },
+                  option.is_winner && styles.winnerFill
+                ]} 
+              />
+            </View>
+            <Text style={styles.percentageText}>{option.percentage}%</Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  // Render user's personal result
+  const renderMyResult = () => {
+    if (poll.status !== 'closed' || !myResult || !myResult.participated) return null;
+
+    const isWinner = myResult.result_status === 'won';
+
+    return (
+      <View style={[styles.myResultSection, isWinner ? styles.winnerResult : styles.loserResult]}>
+        <Text style={styles.myResultTitle}>
+          {isWinner ? '🎉 Congratulations! You Won!' : '😔 Better Luck Next Time'}
+        </Text>
+        
+        <View style={styles.myResultStats}>
+          <View style={styles.myResultRow}>
+            <Text style={styles.myResultLabel}>Your Votes:</Text>
+            <Text style={styles.myResultValue}>{myResult.total_votes}</Text>
+          </View>
+          <View style={styles.myResultRow}>
+            <Text style={styles.myResultLabel}>Amount Spent:</Text>
+            <Text style={styles.myResultValue}>₹{myResult.total_spent?.toFixed(2)}</Text>
+          </View>
+          {isWinner && (
+            <View style={styles.myResultRow}>
+              <Text style={styles.myResultLabel}>🏆 You Won:</Text>
+              <Text style={[styles.myResultValue, styles.winningAmount]}>
+                ₹{myResult.winning_amount?.toFixed(2)}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {myResult.voted_options && myResult.voted_options.length > 0 && (
+          <View style={styles.votedOptionsSection}>
+            <Text style={styles.votedOptionsTitle}>Your Voted Options:</Text>
+            {myResult.voted_options.map((vo, idx) => (
+              <Text key={idx} style={styles.votedOption}>
+                • {vo.option_text}: {vo.vote_count} vote(s) (₹{vo.amount?.toFixed(2)})
+              </Text>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
