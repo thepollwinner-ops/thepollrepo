@@ -829,6 +829,76 @@ Option 3</textarea>
             }
         }
 
+        function editPoll(pollId) {
+            const poll = pollsData.find(p => p.poll_id === pollId);
+            if (!poll) return;
+            
+            document.getElementById('editPollId').value = pollId;
+            document.getElementById('editPollTitle').value = poll.title;
+            document.getElementById('editPollDesc').value = poll.description || '';
+            document.getElementById('editPollPrice').value = poll.price_per_vote;
+            document.getElementById('editPollOptions').value = poll.options.map(o => o.text).join('\n');
+            document.getElementById('editPollModal').classList.remove('hidden');
+        }
+
+        async function savePoll() {
+            const pollId = document.getElementById('editPollId').value;
+            const title = document.getElementById('editPollTitle').value;
+            const description = document.getElementById('editPollDesc').value;
+            const price = parseFloat(document.getElementById('editPollPrice').value);
+            const optionsText = document.getElementById('editPollOptions').value;
+            const options = optionsText.split('\n').filter(o => o.trim()).map(text => ({ text: text.trim() }));
+            
+            if (!title || options.length < 2) {
+                alert('Title and at least 2 options are required');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/polls/${pollId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, description, price_per_vote: price, options })
+                });
+                
+                if (response.ok) {
+                    alert('Poll updated successfully!');
+                    closeModal('editPollModal');
+                    loadPolls();
+                } else {
+                    const err = await response.json();
+                    alert(err.detail || 'Failed to update poll');
+                }
+            } catch (error) {
+                alert('Error updating poll');
+            }
+        }
+
+        async function deletePoll(pollId) {
+            if (!confirm('Are you sure you want to delete this poll? This action cannot be undone.')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/polls/${pollId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    alert('Poll deleted successfully');
+                    loadPolls();
+                    loadDashboard();
+                } else {
+                    const err = await response.json();
+                    alert(err.detail || 'Failed to delete poll');
+                }
+            } catch (error) {
+                alert('Error deleting poll');
+            }
+        }
+
         async function createPoll() {
             const title = document.getElementById('pollTitle').value;
             const description = document.getElementById('pollDesc').value;
