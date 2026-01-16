@@ -898,6 +898,13 @@ async def payment_webhook(request: Request):
 
 app.include_router(api_router)
 
+# Mount admin panel static files
+try:
+    app.mount("/admin", StaticFiles(directory="/app/admin-panel/build", html=True), name="admin")
+    logger.info("Admin panel mounted at /admin")
+except Exception as e:
+    logger.warning(f"Could not mount admin panel: {e}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
