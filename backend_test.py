@@ -12,7 +12,7 @@ import sys
 import os
 
 # Backend URL from environment
-BACKEND_URL = "https://pollwinner-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://vote-cash.preview.emergentagent.com/api"
 
 class PollWinnerAPITester:
     def __init__(self):
