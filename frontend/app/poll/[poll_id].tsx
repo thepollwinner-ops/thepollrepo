@@ -35,6 +35,32 @@ interface Poll {
   result_option_id?: string;
 }
 
+interface PollResults {
+  poll_id: string;
+  status: string;
+  total_votes: number;
+  total_amount: number;
+  winning_option_id?: string;
+  option_results: {
+    option_id: string;
+    text: string;
+    vote_count: number;
+    percentage: number;
+    is_winner: boolean;
+  }[];
+}
+
+interface MyResult {
+  participated: boolean;
+  poll_status?: string;
+  total_votes?: number;
+  total_spent?: number;
+  voted_options?: { option_id: string; option_text: string; vote_count: number; amount: number }[];
+  result_status?: string;
+  winning_amount?: number;
+  winning_option_id?: string;
+}
+
 export default function PollDetailScreen() {
   const params = useLocalSearchParams<{ poll_id: string }>();
   const router = useRouter();
@@ -46,6 +72,8 @@ export default function PollDetailScreen() {
   const [voteCount, setVoteCount] = useState('1');
   const [showVoteModal, setShowVoteModal] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [pollResults, setPollResults] = useState<PollResults | null>(null);
+  const [myResult, setMyResult] = useState<MyResult | null>(null);
 
   useEffect(() => {
     const pollId = Array.isArray(params.poll_id) ? params.poll_id[0] : params.poll_id;
@@ -65,11 +93,38 @@ export default function PollDetailScreen() {
       const response = await axios.get(`${BACKEND_URL}/api/polls/${pollId}`);
       console.log('Poll data received:', response.data);
       setPoll(response.data);
+      
+      // If poll is closed, fetch results
+      if (response.data.status === 'closed') {
+        fetchPollResults(pollId);
+        fetchMyResult(pollId);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching poll:', error);
       setLoading(false);
       Alert.alert('Error', 'Failed to load poll');
+    }
+  };
+
+  const fetchPollResults = async (pollId: string) => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/polls/${pollId}/results`);
+      setPollResults(response.data);
+    } catch (error) {
+      console.error('Error fetching poll results:', error);
+    }
+  };
+
+  const fetchMyResult = async (pollId: string) => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/polls/${pollId}/my-result`, {
+        withCredentials: true
+      });
+      setMyResult(response.data);
+    } catch (error) {
+      console.error('Error fetching my result:', error);
     }
   };
 
