@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://poll-winner.preview.emergentagent.com/api';
 
 export const AuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
