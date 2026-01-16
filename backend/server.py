@@ -986,6 +986,12 @@ async def payment_webhook(request: Request):
 
 # ============= INCLUDE ROUTER =============
 
+# Serve admin panel at /admin-panel route
+@app.get("/admin-panel")
+async def serve_admin_panel():
+    """Serve admin panel"""
+    return FileResponse("/app/admin-panel/build/admin.html", media_type="text/html")
+
 # Now include API router
 app.include_router(api_router)
 
