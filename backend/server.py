@@ -676,6 +676,72 @@ async def get_withdrawal_history(current_user: User = Depends(get_current_user))
     withdrawals = await db.withdrawals.find({"user_id": current_user.user_id}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return withdrawals
 
+@api_router.get("/my-polls")
+async def get_my_polls(current_user: User = Depends(get_current_user)):
+    """Get user's poll participation history"""
+    # Get all votes by this user
+    votes = await db.votes.find({"user_id": current_user.user_id}, {"_id": 0}).to_list(1000)
+    
+    # Get unique poll IDs
+    poll_ids = list(set(v["poll_id"] for v in votes))
+    
+    # Get poll details and user's participation info
+    my_polls = []
+    for poll_id in poll_ids:
+        poll = await db.polls.find_one({"poll_id": poll_id}, {"_id": 0})
+        if not poll:
+            continue
+            
+        user_votes = [v for v in votes if v["poll_id"] == poll_id]
+        total_votes = sum(v["vote_count"] for v in user_votes)
+        total_spent = sum(v["amount_paid"] for v in user_votes)
+        
+        # Get voted options
+        voted_options = []
+        for v in user_votes:
+            opt = next((o for o in poll["options"] if o["option_id"] == v["option_id"]), None)
+            voted_options.append({
+                "option_id": v["option_id"],
+                "option_text": opt["text"] if opt else "Unknown",
+                "vote_count": v["vote_count"],
+                "amount": v["amount_paid"]
+            })
+        
+        # Check result if poll is closed
+        result_status = "pending"
+        winning_amount = 0
+        if poll["status"] == "closed" and poll.get("result_option_id"):
+            user_option_ids = [v["option_id"] for v in user_votes]
+            if poll["result_option_id"] in user_option_ids:
+                result_status = "won"
+                # Get winning transaction
+                win_txn = await db.transactions.find_one({
+                    "user_id": current_user.user_id,
+                    "poll_id": poll_id,
+                    "type": "win"
+                }, {"_id": 0})
+                if win_txn:
+                    winning_amount = win_txn["amount"]
+            else:
+                result_status = "lost"
+        
+        my_polls.append({
+            "poll_id": poll_id,
+            "title": poll["title"],
+            "description": poll.get("description", ""),
+            "status": poll["status"],
+            "price_per_vote": poll["price_per_vote"],
+            "total_votes": total_votes,
+            "total_spent": total_spent,
+            "voted_options": voted_options,
+            "result_status": result_status,
+            "winning_amount": winning_amount,
+            "winning_option_id": poll.get("result_option_id"),
+            "created_at": poll.get("created_at")
+        })
+    
+    return my_polls
+
 @api_router.put("/profile/upi")
 async def update_upi(upi_request: UpdateUPIRequest, current_user: User = Depends(get_current_user)):
     """Update UPI ID"""
