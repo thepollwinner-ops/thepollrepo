@@ -896,21 +896,13 @@ async def payment_webhook(request: Request):
 
 # ============= INCLUDE ROUTER =============
 
-# Serve simple HTML admin panel
+# Now include API router
+app.include_router(api_router)
+
+# Serve simple HTML admin panel AFTER API routes
 @app.get("/admin.html")
 async def serve_simple_admin():
     """Serve simple HTML admin panel"""
-    return FileResponse("/app/admin-panel/build/admin.html", media_type="text/html")
-
-# Serve admin panel BEFORE API routes to avoid conflicts
-@app.get("/admin")
-async def serve_admin_root():
-    """Redirect /admin to admin.html"""
-    return FileResponse("/app/admin-panel/build/admin.html", media_type="text/html")
-
-@app.get("/admin/")
-async def serve_admin_index():
-    """Serve admin panel index"""
     return FileResponse("/app/admin-panel/build/admin.html", media_type="text/html")
 
 # Mount static files for admin panel assets BEFORE dynamic route
@@ -924,10 +916,7 @@ except Exception as e:
 async def serve_admin_spa(full_path: str):
     """Serve admin panel with SPA routing support"""
     # For all admin routes, serve index.html (SPA fallback)
-    return FileResponse("/app/admin-panel/build/index.html", media_type="text/html")
-
-# Now include API router
-app.include_router(api_router)
+    return FileResponse("/app/admin-panel/build/admin.html", media_type="text/html")
 
 app.add_middleware(
     CORSMiddleware,
