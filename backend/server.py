@@ -487,17 +487,12 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, current_us
             "link_id": link_id,
             "link_amount": amount,
             "link_currency": "INR",
-            "link_purpose": f"Vote purchase for {poll['title'][:50]}",
+            "link_purpose": f"Vote purchase for poll",
             "customer_details": {
                 "customer_phone": "9999999999",
                 "customer_email": current_user.email,
                 "customer_name": current_user.name
             },
-            "link_meta": {
-                "return_url": "https://pollwinner-1.preview.emergentagent.com/?payment=success&link_id={link_id}",
-                "notify_url": "https://pollwinner-1.preview.emergentagent.com/api/payments/webhook"
-            },
-            "link_expiry_time": (datetime.now(timezone.utc) + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S+05:30"),
             "link_notify": {
                 "send_sms": False,
                 "send_email": False
