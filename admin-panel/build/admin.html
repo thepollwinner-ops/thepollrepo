@@ -374,6 +374,36 @@ Option 3</textarea>
         </div>
     </div>
 
+    <!-- Edit Poll Modal -->
+    <div id="editPollModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Poll</h2>
+                <button class="close-btn" onclick="closeModal('editPollModal')">&times;</button>
+            </div>
+            <div id="editPollForm">
+                <input type="hidden" id="editPollId" />
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="editPollTitle" />
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="editPollDesc" />
+                </div>
+                <div class="form-group">
+                    <label>Price per Vote (₹)</label>
+                    <input type="number" id="editPollPrice" />
+                </div>
+                <div class="form-group">
+                    <label>Options (one per line)</label>
+                    <textarea id="editPollOptions" rows="5"></textarea>
+                </div>
+                <button class="btn" onclick="savePoll()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_URL = window.location.origin + '/api';
         let token = localStorage.getItem('admin_token');
