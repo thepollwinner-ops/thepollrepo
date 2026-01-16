@@ -916,13 +916,14 @@ async def reject_withdrawal(withdrawal_id: str, notes: str = "", current_admin: 
 @api_router.get("/admin/analytics")
 async def get_analytics(current_admin: Admin = Depends(get_current_admin)):
     """Get dashboard analytics (admin only)"""
-    total_users = await db.users.count_documents({})
+    total_users = await db.users.count_documents({"is_deleted": {"$ne": True}})
     total_polls = await db.polls.count_documents({})
     active_polls = await db.polls.count_documents({"status": "active"})
     pending_withdrawals = await db.withdrawals.count_documents({"status": "pending"})
+    closed_polls = await db.polls.count_documents({"status": "closed"})
     
     total_transactions = await db.transactions.aggregate([
-        {"$match": {"status": "success"}},
+        {"$match": {"status": "success", "type": "purchase"}},
         {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
     ]).to_list(1)
     
@@ -932,8 +933,313 @@ async def get_analytics(current_admin: Admin = Depends(get_current_admin)):
         "total_users": total_users,
         "total_polls": total_polls,
         "active_polls": active_polls,
+        "closed_polls": closed_polls,
         "pending_withdrawals": pending_withdrawals,
         "total_revenue": total_revenue
+    }
+
+# ============= USER MANAGEMENT ROUTES =============
+
+class UpdateUserRequest(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    upi_id: Optional[str] = None
+
+@api_router.get("/admin/users/{user_id}")
+async def get_user_detail(user_id: str, current_admin: Admin = Depends(get_current_admin)):
+    """Get detailed user info with poll participation"""
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0})
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    # Get wallet
+    wallet = await db.wallets.find_one({"user_id": user_id}, {"_id": 0})
+    
+    # Get user's votes with poll info
+    votes = await db.votes.find({"user_id": user_id}, {"_id": 0}).to_list(1000)
+    
+    # Get poll participation details
+    poll_participation = []
+    poll_ids = list(set(v["poll_id"] for v in votes))
+    for poll_id in poll_ids:
+        poll = await db.polls.find_one({"poll_id": poll_id}, {"_id": 0})
+        if poll:
+            user_votes = [v for v in votes if v["poll_id"] == poll_id]
+            total_votes = sum(v["vote_count"] for v in user_votes)
+            total_spent = sum(v["amount_paid"] for v in user_votes)
+            
+            # Check if user won
+            user_won = False
+            winning_amount = 0
+            if poll.get("result_option_id"):
+                user_voted_options = [v["option_id"] for v in user_votes]
+                if poll["result_option_id"] in user_voted_options:
+                    user_won = True
+                    # Get winning transaction
+                    win_txn = await db.transactions.find_one({
+                        "user_id": user_id, 
+                        "poll_id": poll_id, 
+                        "type": "win"
+                    }, {"_id": 0})
+                    if win_txn:
+                        winning_amount = win_txn["amount"]
+            
+            poll_participation.append({
+                "poll_id": poll_id,
+                "poll_title": poll["title"],
+                "poll_status": poll["status"],
+                "total_votes": total_votes,
+                "total_spent": total_spent,
+                "voted_options": [v["option_id"] for v in user_votes],
+                "user_won": user_won,
+                "winning_amount": winning_amount
+            })
+    
+    # Get transactions
+    transactions = await db.transactions.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    return {
+        "user": user,
+        "wallet": wallet,
+        "poll_participation": poll_participation,
+        "recent_transactions": transactions
+    }
+
+@api_router.put("/admin/users/{user_id}")
+async def update_user(user_id: str, user_data: UpdateUserRequest, current_admin: Admin = Depends(get_current_admin)):
+    """Update user info (admin only)"""
+    user = await db.users.find_one({"user_id": user_id})
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    update_data = {}
+    if user_data.name:
+        update_data["name"] = user_data.name
+    if user_data.email:
+        # Check if email already exists
+        existing = await db.users.find_one({"email": user_data.email, "user_id": {"$ne": user_id}})
+        if existing:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already in use")
+        update_data["email"] = user_data.email
+    if user_data.upi_id is not None:
+        update_data["upi_id"] = user_data.upi_id
+    
+    if update_data:
+        await db.users.update_one({"user_id": user_id}, {"$set": update_data})
+    
+    return {"message": "User updated successfully"}
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, current_admin: Admin = Depends(get_current_admin)):
+    """Soft delete user (admin only)"""
+    user = await db.users.find_one({"user_id": user_id})
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    # Soft delete - mark as deleted
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"is_deleted": True, "deleted_at": datetime.now(timezone.utc)}}
+    )
+    
+    # Invalidate all sessions
+    await db.user_sessions.delete_many({"user_id": user_id})
+    
+    return {"message": "User deleted successfully"}
+
+@api_router.put("/admin/users/{user_id}/restore")
+async def restore_user(user_id: str, current_admin: Admin = Depends(get_current_admin)):
+    """Restore soft deleted user (admin only)"""
+    user = await db.users.find_one({"user_id": user_id})
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$unset": {"is_deleted": "", "deleted_at": ""}}
+    )
+    
+    return {"message": "User restored successfully"}
+
+# ============= POLL STATISTICS ROUTES =============
+
+@api_router.get("/admin/polls/{poll_id}/stats")
+async def get_poll_stats(poll_id: str, current_admin: Admin = Depends(get_current_admin)):
+    """Get detailed poll statistics"""
+    poll = await db.polls.find_one({"poll_id": poll_id}, {"_id": 0})
+    if not poll:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found")
+    
+    # Get all votes for this poll
+    votes = await db.votes.find({"poll_id": poll_id}, {"_id": 0}).to_list(10000)
+    
+    # Calculate total amount collected
+    total_amount = sum(v["amount_paid"] for v in votes)
+    total_votes = sum(v["vote_count"] for v in votes)
+    
+    # Get votes per option
+    option_stats = {}
+    for opt in poll["options"]:
+        opt_votes = [v for v in votes if v["option_id"] == opt["option_id"]]
+        option_stats[opt["option_id"]] = {
+            "text": opt["text"],
+            "vote_count": sum(v["vote_count"] for v in opt_votes),
+            "amount": sum(v["amount_paid"] for v in opt_votes),
+            "voter_count": len(set(v["user_id"] for v in opt_votes))
+        }
+    
+    # Get voter details
+    voter_details = []
+    user_ids = list(set(v["user_id"] for v in votes))
+    for uid in user_ids:
+        user = await db.users.find_one({"user_id": uid}, {"_id": 0, "password_hash": 0})
+        user_votes = [v for v in votes if v["user_id"] == uid]
+        
+        voter_info = {
+            "user_id": uid,
+            "user_name": user["name"] if user else "Unknown",
+            "user_email": user["email"] if user else "Unknown",
+            "total_votes": sum(v["vote_count"] for v in user_votes),
+            "total_amount": sum(v["amount_paid"] for v in user_votes),
+            "voted_options": []
+        }
+        
+        for v in user_votes:
+            opt = next((o for o in poll["options"] if o["option_id"] == v["option_id"]), None)
+            voter_info["voted_options"].append({
+                "option_id": v["option_id"],
+                "option_text": opt["text"] if opt else "Unknown",
+                "vote_count": v["vote_count"],
+                "amount": v["amount_paid"]
+            })
+        
+        voter_details.append(voter_info)
+    
+    # Win/Loss stats if poll is closed
+    win_loss_stats = None
+    if poll["status"] == "closed" and poll.get("result_option_id"):
+        winning_option = poll["result_option_id"]
+        winning_votes = sum(v["vote_count"] for v in votes if v["option_id"] == winning_option)
+        losing_votes = sum(v["vote_count"] for v in votes if v["option_id"] != winning_option)
+        winning_amount = sum(v["amount_paid"] for v in votes if v["option_id"] == winning_option)
+        losing_amount = sum(v["amount_paid"] for v in votes if v["option_id"] != winning_option)
+        
+        win_loss_stats = {
+            "winning_option_id": winning_option,
+            "winning_option_text": option_stats.get(winning_option, {}).get("text", "Unknown"),
+            "winning_votes": winning_votes,
+            "winning_amount": winning_amount,
+            "losing_votes": losing_votes,
+            "losing_amount": losing_amount,
+            "distributed_to_winners": losing_amount
+        }
+    
+    return {
+        "poll": poll,
+        "total_amount": total_amount,
+        "total_votes": total_votes,
+        "unique_voters": len(user_ids),
+        "option_stats": option_stats,
+        "voter_details": voter_details,
+        "win_loss_stats": win_loss_stats
+    }
+
+# ============= PUBLIC POLL STATS FOR MOBILE APP =============
+
+@api_router.get("/polls/{poll_id}/results")
+async def get_poll_results(poll_id: str):
+    """Get poll results for mobile app"""
+    poll = await db.polls.find_one({"poll_id": poll_id}, {"_id": 0})
+    if not poll:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found")
+    
+    # Get all votes
+    votes = await db.votes.find({"poll_id": poll_id}, {"_id": 0}).to_list(10000)
+    
+    total_votes = sum(v["vote_count"] for v in votes)
+    total_amount = sum(v["amount_paid"] for v in votes)
+    
+    # Option breakdown
+    option_results = []
+    for opt in poll["options"]:
+        opt_votes = [v for v in votes if v["option_id"] == opt["option_id"]]
+        vote_count = sum(v["vote_count"] for v in opt_votes)
+        percentage = (vote_count / total_votes * 100) if total_votes > 0 else 0
+        
+        option_results.append({
+            "option_id": opt["option_id"],
+            "text": opt["text"],
+            "vote_count": vote_count,
+            "percentage": round(percentage, 1),
+            "is_winner": opt["option_id"] == poll.get("result_option_id")
+        })
+    
+    return {
+        "poll_id": poll_id,
+        "status": poll["status"],
+        "total_votes": total_votes,
+        "total_amount": total_amount,
+        "winning_option_id": poll.get("result_option_id"),
+        "option_results": option_results
+    }
+
+@api_router.get("/polls/{poll_id}/my-result")
+async def get_my_poll_result(poll_id: str, current_user: User = Depends(get_current_user)):
+    """Get user's result for a specific poll"""
+    poll = await db.polls.find_one({"poll_id": poll_id}, {"_id": 0})
+    if not poll:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found")
+    
+    # Get user's votes
+    user_votes = await db.votes.find({"poll_id": poll_id, "user_id": current_user.user_id}, {"_id": 0}).to_list(100)
+    
+    if not user_votes:
+        return {
+            "participated": False,
+            "message": "You did not participate in this poll"
+        }
+    
+    total_votes = sum(v["vote_count"] for v in user_votes)
+    total_spent = sum(v["amount_paid"] for v in user_votes)
+    voted_options = []
+    
+    for v in user_votes:
+        opt = next((o for o in poll["options"] if o["option_id"] == v["option_id"]), None)
+        voted_options.append({
+            "option_id": v["option_id"],
+            "option_text": opt["text"] if opt else "Unknown",
+            "vote_count": v["vote_count"],
+            "amount": v["amount_paid"]
+        })
+    
+    # Check win/loss if poll is closed
+    result_status = "pending"
+    winning_amount = 0
+    
+    if poll["status"] == "closed" and poll.get("result_option_id"):
+        user_voted_option_ids = [v["option_id"] for v in user_votes]
+        if poll["result_option_id"] in user_voted_option_ids:
+            result_status = "won"
+            # Get winning transaction
+            win_txn = await db.transactions.find_one({
+                "user_id": current_user.user_id,
+                "poll_id": poll_id,
+                "type": "win"
+            }, {"_id": 0})
+            if win_txn:
+                winning_amount = win_txn["amount"]
+        else:
+            result_status = "lost"
+    
+    return {
+        "participated": True,
+        "poll_status": poll["status"],
+        "total_votes": total_votes,
+        "total_spent": total_spent,
+        "voted_options": voted_options,
+        "result_status": result_status,
+        "winning_amount": winning_amount,
+        "winning_option_id": poll.get("result_option_id")
     }
 
 # ============= PAYMENT WEBHOOK =============
