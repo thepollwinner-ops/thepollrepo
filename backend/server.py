@@ -559,11 +559,19 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, current_us
             }
             await db.transactions.insert_one(transaction)
             
+            # Construct payment URL for Cashfree checkout
+            payment_session_id = cashfree_data.get("payment_session_id")
+            cf_order_id = cashfree_data.get("cf_order_id")
+            
+            # Use Cashfree's hosted checkout URL for sandbox
+            # Format: https://sandbox.cashfree.com/pg/orders/sessions/{payment_session_id}/pay
+            payment_url = f"https://sandbox.cashfree.com/pg/view/order/{order_id}?session_id={payment_session_id}"
+            
             return {
                 "order_id": order_id,
-                "payment_session_id": cashfree_data.get("payment_session_id"),
-                "payment_url": cashfree_data.get("payment_link"),
-                "cf_order_id": cashfree_data.get("cf_order_id"),
+                "payment_session_id": payment_session_id,
+                "payment_url": payment_url,
+                "cf_order_id": cf_order_id,
                 "amount": amount,
                 "status": "pending"
             }
