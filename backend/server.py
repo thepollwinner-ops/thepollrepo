@@ -995,18 +995,6 @@ async def payment_webhook(request: Request):
 # Now include API router
 app.include_router(api_router)
 
-# Serve admin panel at /api/admin-panel (must be AFTER api_router to not conflict)
-@app.get("/api/admin-panel")
-async def serve_admin_panel():
-    """Serve admin panel HTML"""
-    return FileResponse("/app/admin-panel/build/admin.html", media_type="text/html")
-
-# Serve simple HTML admin panel AFTER API routes
-@app.get("/admin.html")
-async def serve_simple_admin():
-    """Serve simple HTML admin panel"""
-    return FileResponse("/app/admin-panel/build/admin.html", media_type="text/html")
-
 # Mount static files for admin panel assets BEFORE dynamic route
 try:
     app.mount("/admin/static", StaticFiles(directory="/app/admin-panel/build/static"), name="admin-static")
