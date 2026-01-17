@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Backend API Testing for The Poll Winner Application
-Tests admin authentication, poll management, and public endpoints
+Tests user authentication, poll APIs, wallet APIs, and payment callback
 """
 
 import requests
@@ -12,7 +12,7 @@ import sys
 import os
 
 # Backend URL from environment
-BACKEND_URL = "https://voteapp-1.preview.emergentagent.com/api"
+BACKEND_URL = "http://localhost:8001/api"
 
 class PollWinnerAPITester:
     def __init__(self):
