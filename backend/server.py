@@ -46,18 +46,24 @@ async def serve_admin_panel_route():
     """Serve admin panel HTML - must be before API router"""
     return FileResponse("/app/admin-panel/build/admin.html", media_type="text/html")
 
+# Serve customer web app
+@app.get("/api/vote", include_in_schema=False)
+async def serve_web_app():
+    """Serve customer voting web app"""
+    return FileResponse("/app/web-app/index.html", media_type="text/html")
+
 # Payment callback page - redirects user back to app after payment
 from fastapi.responses import HTMLResponse
 
 @app.get("/api/payment/callback", include_in_schema=False)
-async def payment_callback(poll_id: str = "", link_id: str = "", user_id: str = "", vote_count: str = "1", option_id: str = ""):
-    """Handle payment callback and redirect user back to app"""
+async def payment_callback(poll_id: str = "", link_id: str = "", order_id: str = "", user_id: str = "", vote_count: str = "1", option_id: str = ""):
+    """Handle payment callback and redirect user back to web app or mobile app"""
     # Create an HTML page that shows payment status and allows returning to app
     html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
-        <meta charset="UTF-8">
+        <meta charset="UTF-8">>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Payment Complete - The Poll Winner</title>
         <style>
