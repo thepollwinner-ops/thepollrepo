@@ -200,21 +200,46 @@ export default function PollDetailScreen() {
         setShowVoteModal(false);
         setProcessing(false);
 
+        // Store the vote details for after payment
+        const pendingVote = { optionId: selectedOption, voteCount: count };
+
         // Open payment URL in browser
         const result = await WebBrowser.openBrowserAsync(payment_url);
         
-        if (result.type === 'dismiss' || result.type === 'cancel') {
-          Alert.alert(
-            'Payment Status',
-            'Payment window was closed. If payment was successful, your votes will be available shortly.',
-            [
-              {
-                text: 'OK',
-                onPress: () => router.back(),
+        // When user returns from payment (regardless of how they closed it)
+        Alert.alert(
+          'Payment Complete?',
+          'If your payment was successful, tap "Cast Vote" to submit your vote. If not, you can try again.',
+          [
+            {
+              text: 'Cast Vote',
+              onPress: async () => {
+                try {
+                  setProcessing(true);
+                  await axios.post(
+                    `${BACKEND_URL}/api/polls/${pollId}/vote`,
+                    { option_id: pendingVote.optionId, vote_count: pendingVote.voteCount },
+                    { withCredentials: true }
+                  );
+                  
+                  Alert.alert('Success! 🎉', 'Your vote has been cast successfully!', [
+                    { text: 'OK', onPress: () => router.back() },
+                  ]);
+                } catch (error: any) {
+                  const errorMsg = error.response?.data?.detail || 'Voting failed. Please ensure payment was successful.';
+                  Alert.alert('Error', errorMsg);
+                } finally {
+                  setProcessing(false);
+                }
               },
-            ]
-          );
-        }
+            },
+            {
+              text: 'Go Back',
+              style: 'cancel',
+              onPress: () => router.back(),
+            },
+          ]
+        );
       } else {
         // No payment URL, show message and allow voting
         setShowVoteModal(false);
