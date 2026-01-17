@@ -467,7 +467,7 @@ async def get_poll(poll_id: str):
     return poll
 
 @api_router.post("/polls/{poll_id}/purchase")
-async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, current_user: User = Depends(get_current_user)):
+async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, req: Request, current_user: User = Depends(get_current_user)):
     """Purchase votes for a poll using Cashfree Payment Links"""
     poll = await db.polls.find_one({"poll_id": poll_id}, {"_id": 0})
     if not poll:
@@ -478,6 +478,11 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, current_us
     
     amount = request.vote_count * poll["price_per_vote"]
     link_id = f"link_{current_user.user_id}_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
+    
+    # Build return URL for redirect after payment
+    # Use a web page that will redirect to the app via deep link
+    base_url = str(req.base_url).rstrip('/')
+    return_url = f"{base_url}/api/payment/callback?poll_id={poll_id}&link_id={link_id}&user_id={current_user.user_id}&vote_count={request.vote_count}&option_id={request.option_id if hasattr(request, 'option_id') else ''}"
     
     try:
         # Use Cashfree Payment Links API for direct URL that works on mobile
@@ -496,6 +501,9 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, current_us
             "link_notify": {
                 "send_sms": False,
                 "send_email": False
+            },
+            "link_meta": {
+                "return_url": return_url
             }
         }
         
