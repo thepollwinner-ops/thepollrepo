@@ -151,20 +151,20 @@ async def payment_callback(poll_id: str = "", link_id: str = "", order_id: str =
             <h1>Payment Initiated!</h1>
             <p>Your payment is being processed. Once confirmed, your votes will be added automatically.</p>
             
-            <a href="frontend://poll/{poll_id}" class="btn">Open App</a>
+            <a href="/api/vote" class="btn">Back to Voting</a>
             <br>
-            <a href="/" class="btn btn-secondary">Go to Website</a>
+            <a href="/api/vote" class="btn btn-secondary">View Polls</a>
             
             <div class="note">
-                <strong>Note:</strong> If the app doesn't open, please go back to the Expo Go app manually and refresh the poll page.
+                <strong>Note:</strong> Your vote will be cast automatically once the payment is confirmed.
             </div>
         </div>
         
         <script>
-            // Try to auto-redirect to the app after 2 seconds
+            // Auto-redirect to voting page after 3 seconds
             setTimeout(function() {{
-                window.location.href = 'frontend://poll/{poll_id}';
-            }}, 2000);
+                window.location.href = '/api/vote';
+            }}, 3000);
         </script>
     </body>
     </html>
