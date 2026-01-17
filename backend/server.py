@@ -637,7 +637,7 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, req: Reque
             },
             "order_meta": {
                 "return_url": return_url,
-                "notify_url": f"{base_url}/api/payment/webhook"
+                "notify_url": f"{app_url}/api/payment/webhook"
             },
             "order_note": f"Vote purchase for poll: {poll['title'][:50]}"
         }
