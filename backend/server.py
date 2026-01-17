@@ -675,7 +675,7 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, req: Reque
                 # Fall back to auto-approve for testing when Cashfree fails
                 
     except Exception as e:
-        logger.error(f"Cashfree Payment Link error: {str(e)}")
+        logger.error(f"Cashfree Order error: {str(e)}")
     
     # Fallback: Auto-approve for testing when Cashfree API fails
     transaction = {
@@ -685,15 +685,16 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, req: Reque
         "amount": amount,
         "status": "success",  # Auto-approve for testing
         "poll_id": poll_id,
-        "cashfree_order_id": link_id,
+        "cashfree_order_id": order_id,
         "vote_count": request.vote_count,
+        "option_id": request.option_id,
         "created_at": datetime.now(timezone.utc)
     }
     await db.transactions.insert_one(transaction)
     
     return {
-        "order_id": link_id,
-        "payment_url": None,
+        "order_id": order_id,
+        "payment_session_id": None,
         "amount": amount,
         "status": "success",
         "message": "Payment auto-approved for testing. Cashfree integration will work in production."
