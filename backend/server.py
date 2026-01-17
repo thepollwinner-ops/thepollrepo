@@ -76,6 +76,11 @@ async def payment_callback(poll_id: str = "", order_id: str = "", user_id: str =
                 })
                 
                 if not existing_vote:
+                    # Get the poll to calculate amount
+                    poll = await db.polls.find_one({"poll_id": poll_id})
+                    price_per_vote = poll.get("price_per_vote", 1) if poll else 1
+                    amount_paid = int(vote_count) * price_per_vote
+                    
                     # Cast the vote
                     vote = {
                         "vote_id": f"vote_{uuid.uuid4().hex[:12]}",
@@ -83,6 +88,7 @@ async def payment_callback(poll_id: str = "", order_id: str = "", user_id: str =
                         "poll_id": poll_id,
                         "option_id": option_id,
                         "vote_count": int(vote_count),
+                        "amount_paid": amount_paid,
                         "cashfree_order_id": order_id,
                         "created_at": datetime.now(timezone.utc)
                     }
