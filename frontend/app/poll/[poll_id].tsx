@@ -169,7 +169,7 @@ export default function PollDetailScreen() {
 
       console.log('Purchase response:', purchaseResponse.data);
       
-      const { payment_url, status, message } = purchaseResponse.data;
+      const { payment_session_id, order_id, status, message, amount, return_url } = purchaseResponse.data;
 
       // If payment is auto-approved (testing mode)
       if (status === 'success') {
@@ -195,51 +195,24 @@ export default function PollDetailScreen() {
         return;
       }
 
-      // If payment URL is provided, open Cashfree payment gateway
-      if (payment_url) {
+      // If payment session is provided, navigate to WebView payment screen
+      if (payment_session_id) {
         setShowVoteModal(false);
         setProcessing(false);
 
-        // Store the vote details for after payment
-        const pendingVote = { optionId: selectedOption, voteCount: count };
-
-        // Open payment URL in browser
-        const result = await WebBrowser.openBrowserAsync(payment_url);
-        
-        // When user returns from payment (regardless of how they closed it)
-        Alert.alert(
-          'Payment Complete?',
-          'If your payment was successful, tap "Cast Vote" to submit your vote. If not, you can try again.',
-          [
-            {
-              text: 'Cast Vote',
-              onPress: async () => {
-                try {
-                  setProcessing(true);
-                  await axios.post(
-                    `${BACKEND_URL}/api/polls/${pollId}/vote`,
-                    { option_id: pendingVote.optionId, vote_count: pendingVote.voteCount },
-                    { withCredentials: true }
-                  );
-                  
-                  Alert.alert('Success! 🎉', 'Your vote has been cast successfully!', [
-                    { text: 'OK', onPress: () => router.back() },
-                  ]);
-                } catch (error: any) {
-                  const errorMsg = error.response?.data?.detail || 'Voting failed. Please ensure payment was successful.';
-                  Alert.alert('Error', errorMsg);
-                } finally {
-                  setProcessing(false);
-                }
-              },
-            },
-            {
-              text: 'Go Back',
-              style: 'cancel',
-              onPress: () => router.back(),
-            },
-          ]
-        );
+        // Navigate to the payment WebView screen
+        router.push({
+          pathname: '/payment',
+          params: {
+            order_id: order_id,
+            payment_session_id: payment_session_id,
+            amount: amount.toString(),
+            poll_id: pollId,
+            option_id: selectedOption,
+            vote_count: count.toString(),
+            return_url: return_url,
+          },
+        });
       } else {
         // No payment URL, show message and allow voting
         setShowVoteModal(false);
