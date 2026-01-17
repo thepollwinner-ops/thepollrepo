@@ -1,14 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { TrendingUp, Sparkles, Flame } from 'lucide-react';
 import { getPolls } from '../api';
 import PollCard from '../components/PollCard';
 import Loading from '../components/Loading';
+import { useToast } from '../components/Toast';
 
 const PollsPage = () => {
   const [polls, setPolls] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { showToast } = useToast();
 
   useEffect(() => {
+    // Check for payment status in URL
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      showToast('Payment successful! Your vote has been cast 🎉', 'success');
+      // Clear the URL parameter
+      setSearchParams({});
+    } else if (paymentStatus === 'pending') {
+      showToast('Payment is being processed...', 'success');
+      setSearchParams({});
+    }
     loadPolls();
   }, []);
 
