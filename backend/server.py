@@ -609,8 +609,10 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, req: Reque
     amount = request.vote_count * poll["price_per_vote"]
     order_id = f"order_{current_user.user_id[:8]}_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
     
-    # Build return URL for redirect after payment
+    # Build return URL for redirect after payment - force HTTPS
     base_url = str(req.base_url).rstrip('/')
+    if base_url.startswith('http://'):
+        base_url = base_url.replace('http://', 'https://', 1)
     return_url = f"{base_url}/api/payment/callback?poll_id={poll_id}&order_id={order_id}&user_id={current_user.user_id}&vote_count={request.vote_count}&option_id={request.option_id or ''}"
     
     try:
