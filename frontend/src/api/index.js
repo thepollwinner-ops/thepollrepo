@@ -21,7 +21,7 @@ export const getPollResults = (pollId) => api.get(`/polls/${pollId}/results`);
 export const getMyResult = (pollId) => api.get(`/polls/${pollId}/my-result`);
 export const purchaseVotes = (pollId, data) => api.post(`/polls/${pollId}/purchase`, data);
 export const castVote = (pollId, data) => api.post(`/polls/${pollId}/vote`, data);
-export const getPollHistory = () => api.get('/polls/history');
+export const getPollHistory = () => api.get('/my-polls');
 
 // Wallet APIs
 export const getWallet = () => api.get('/wallet');
