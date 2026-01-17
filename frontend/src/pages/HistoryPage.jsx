@@ -55,13 +55,13 @@ const HistoryPage = () => {
             <div key={index} className="glass-card p-6 hover:border-sky-500/30 transition-all">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
-                  <h3 className="font-bold text-white text-lg mb-1">{item.poll_title}</h3>
+                  <h3 className="font-bold text-white text-lg mb-1">{item.title}</h3>
                   <p className="text-slate-400 text-sm">
                     {item.total_votes} vote{item.total_votes > 1 ? 's' : ''} • ₹{item.total_spent} invested
                   </p>
                 </div>
-                <span className={`badge ${item.poll_status === 'active' ? 'badge-success' : 'badge-danger'}`}>
-                  {item.poll_status === 'active' ? 'Live' : 'Ended'}
+                <span className={`badge ${item.status === 'active' ? 'badge-success' : 'badge-danger'}`}>
+                  {item.status === 'active' ? 'Live' : 'Ended'}
                 </span>
               </div>
               
