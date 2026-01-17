@@ -1,0 +1,72 @@
+[
+  {
+    "test": "User Registration",
+    "success": true,
+    "message": "Successfully registered user: testapi_41378b12@test.com",
+    "details": {},
+    "timestamp": "2026-01-17T10:49:04.367215"
+  },
+  {
+    "test": "User Login",
+    "success": true,
+    "message": "Successfully logged in user: testapi_41378b12@test.com",
+    "details": {},
+    "timestamp": "2026-01-17T10:49:04.593839"
+  },
+  {
+    "test": "Get Current User",
+    "success": true,
+    "message": "Successfully retrieved user info: testapi_41378b12@test.com",
+    "details": {},
+    "timestamp": "2026-01-17T10:49:04.596785"
+  },
+  {
+    "test": "Get Polls",
+    "success": true,
+    "message": "Successfully retrieved 1 polls",
+    "details": {},
+    "timestamp": "2026-01-17T10:49:04.598958"
+  },
+  {
+    "test": "Get Specific Poll",
+    "success": true,
+    "message": "Successfully retrieved poll: Who will win between India and New Zealand in today's ony day match at Indore?",
+    "details": {},
+    "timestamp": "2026-01-17T10:49:04.601077"
+  },
+  {
+    "test": "Purchase Votes",
+    "success": true,
+    "message": "Cashfree order created successfully. Order ID: order_user_a62_1768646944603",
+    "details": {},
+    "timestamp": "2026-01-17T10:49:05.685221"
+  },
+  {
+    "test": "Get Wallet",
+    "success": true,
+    "message": "Wallet balance: \u20b90.0",
+    "details": {},
+    "timestamp": "2026-01-17T10:49:05.688798"
+  },
+  {
+    "test": "Get Transactions",
+    "success": true,
+    "message": "Retrieved 1 transactions",
+    "details": {},
+    "timestamp": "2026-01-17T10:49:05.692327"
+  },
+  {
+    "test": "Get My Polls",
+    "success": true,
+    "message": "Retrieved 0 poll participations",
+    "details": {},
+    "timestamp": "2026-01-17T10:49:05.695351"
+  },
+  {
+    "test": "Payment Callback",
+    "success": true,
+    "message": "Callback returns HTML with payment status",
+    "details": {},
+    "timestamp": "2026-01-17T10:49:05.697245"
+  }
+]
