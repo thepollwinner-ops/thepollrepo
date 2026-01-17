@@ -164,6 +164,7 @@ class Withdrawal(BaseModel):
 class PurchaseVotesRequest(BaseModel):
     poll_id: str
     vote_count: int
+    option_id: Optional[str] = None  # Option selected for voting
 
 class WithdrawalRequest(BaseModel):
     amount: float
