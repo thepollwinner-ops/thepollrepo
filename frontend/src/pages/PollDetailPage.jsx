@@ -63,7 +63,8 @@ const PollDetailPage = () => {
           optionId: selectedOption,
           voteCount,
         }));
-        window.location.href = `https://payments.cashfree.com/forms?sessionId=${data.payment_session_id}`;
+        // Use sandbox URL for testing
+        window.location.href = `https://payments-test.cashfree.com/forms?sessionId=${data.payment_session_id}`;
       }
     } catch (err) {
       showToast(err.response?.data?.detail || 'Failed to process vote', 'error');
