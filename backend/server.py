@@ -52,124 +52,128 @@ async def serve_web_app():
     """Serve customer voting web app"""
     return FileResponse("/app/web-app/index.html", media_type="text/html")
 
-# Payment callback page - redirects user back to app after payment
-from fastapi.responses import HTMLResponse
+# Payment callback page - handles return from Cashfree and casts vote
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 @app.get("/api/payment/callback", include_in_schema=False)
-async def payment_callback(poll_id: str = "", link_id: str = "", order_id: str = "", user_id: str = "", vote_count: str = "1", option_id: str = ""):
-    """Handle payment callback and redirect user back to web app or mobile app"""
-    # Create an HTML page that shows payment status and allows returning to app
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Payment Complete - The Poll Winner</title>
-        <style>
-            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-            body {{
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            }}
-            .container {{
-                background: white;
-                border-radius: 20px;
-                padding: 40px 30px;
-                text-align: center;
-                max-width: 400px;
-                width: 100%;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            }}
-            .icon {{
-                width: 80px;
-                height: 80px;
-                background: #10b981;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin: 0 auto 20px;
-            }}
-            .icon svg {{ width: 40px; height: 40px; color: white; }}
-            h1 {{
-                color: #1e293b;
-                font-size: 24px;
-                margin-bottom: 10px;
-            }}
-            p {{
-                color: #64748b;
-                font-size: 16px;
-                margin-bottom: 30px;
-                line-height: 1.5;
-            }}
-            .btn {{
-                display: inline-block;
-                background: #6366f1;
-                color: white;
-                padding: 16px 32px;
-                border-radius: 12px;
-                text-decoration: none;
-                font-weight: 600;
-                font-size: 16px;
-                margin: 10px;
-                transition: transform 0.2s, box-shadow 0.2s;
-            }}
-            .btn:hover {{
-                transform: translateY(-2px);
-                box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
-            }}
-            .btn-secondary {{
-                background: #e2e8f0;
-                color: #475569;
-            }}
-            .btn-secondary:hover {{
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            }}
-            .note {{
-                margin-top: 20px;
-                padding: 15px;
-                background: #fef3c7;
-                border-radius: 10px;
-                color: #92400e;
-                font-size: 14px;
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
+async def payment_callback(poll_id: str = "", order_id: str = "", user_id: str = "", vote_count: str = "1", option_id: str = ""):
+    """Handle payment callback - cast vote and redirect to web app"""
+    
+    # Try to cast the vote automatically
+    vote_success = False
+    error_message = ""
+    
+    if poll_id and user_id and option_id:
+        try:
+            # Find the user
+            user = await db.users.find_one({"user_id": user_id})
+            if user:
+                # Check if vote already exists for this order
+                existing_vote = await db.votes.find_one({
+                    "user_id": user_id,
+                    "poll_id": poll_id,
+                    "cashfree_order_id": order_id
+                })
+                
+                if not existing_vote:
+                    # Cast the vote
+                    vote = {
+                        "vote_id": f"vote_{uuid.uuid4().hex[:12]}",
+                        "user_id": user_id,
+                        "poll_id": poll_id,
+                        "option_id": option_id,
+                        "vote_count": int(vote_count),
+                        "cashfree_order_id": order_id,
+                        "created_at": datetime.now(timezone.utc)
+                    }
+                    await db.votes.insert_one(vote)
+                    
+                    # Update transaction status
+                    await db.transactions.update_one(
+                        {"cashfree_order_id": order_id},
+                        {"$set": {"status": "success"}}
+                    )
+                    vote_success = True
+                else:
+                    vote_success = True  # Already voted
+        except Exception as e:
+            error_message = str(e)
+            logger.error(f"Payment callback error: {e}")
+    
+    # Redirect to web app with status
+    if vote_success:
+        # Success - redirect to home with success parameter
+        return RedirectResponse(url="/?payment=success", status_code=302)
+    else:
+        # Show a page that will redirect
+        html_content = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Processing Payment - The Poll Winner</title>
+            <style>
+                * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+                body {{
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: #0f172a;
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                }}
+                .container {{
+                    background: rgba(30, 41, 59, 0.9);
+                    border: 1px solid rgba(148, 163, 184, 0.1);
+                    border-radius: 24px;
+                    padding: 48px 40px;
+                    text-align: center;
+                    max-width: 450px;
+                    width: 100%;
+                }}
+                .spinner {{
+                    width: 60px;
+                    height: 60px;
+                    border: 4px solid rgba(14, 165, 233, 0.2);
+                    border-top: 4px solid #0ea5e9;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 24px;
+                }}
+                @keyframes spin {{
+                    0% {{ transform: rotate(0deg); }}
+                    100% {{ transform: rotate(360deg); }}
+                }}
+                h1 {{
+                    color: white;
+                    font-size: 24px;
+                    margin-bottom: 12px;
+                }}
+                p {{
+                    color: #94a3b8;
+                    font-size: 16px;
+                    line-height: 1.6;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="spinner"></div>
+                <h1>Processing Your Vote...</h1>
+                <p>Please wait while we confirm your payment and cast your vote.</p>
             </div>
-            <h1>Payment Initiated!</h1>
-            <p>Your payment is being processed. Once confirmed, your votes will be added automatically.</p>
-            
-            <a href="/api/vote" class="btn">Back to Voting</a>
-            <br>
-            <a href="/api/vote" class="btn btn-secondary">View Polls</a>
-            
-            <div class="note">
-                <strong>Note:</strong> Your vote will be cast automatically once the payment is confirmed.
-            </div>
-        </div>
-        
-        <script>
-            // Auto-redirect to voting page after 3 seconds
-            setTimeout(function() {{
-                window.location.href = '/api/vote';
-            }}, 3000);
-        </script>
-    </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content)
+            <script>
+                // Redirect to home after brief delay
+                setTimeout(function() {{
+                    window.location.href = '/?payment=pending';
+                }}, 2000);
+            </script>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
