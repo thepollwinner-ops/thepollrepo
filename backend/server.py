@@ -46,6 +46,125 @@ async def serve_admin_panel_route():
     """Serve admin panel HTML - must be before API router"""
     return FileResponse("/app/admin-panel/build/admin.html", media_type="text/html")
 
+# Payment callback page - redirects user back to app after payment
+from fastapi.responses import HTMLResponse
+
+@app.get("/api/payment/callback", include_in_schema=False)
+async def payment_callback(poll_id: str = "", link_id: str = "", user_id: str = "", vote_count: str = "1", option_id: str = ""):
+    """Handle payment callback and redirect user back to app"""
+    # Create an HTML page that shows payment status and allows returning to app
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Payment Complete - The Poll Winner</title>
+        <style>
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }}
+            .container {{
+                background: white;
+                border-radius: 20px;
+                padding: 40px 30px;
+                text-align: center;
+                max-width: 400px;
+                width: 100%;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            }}
+            .icon {{
+                width: 80px;
+                height: 80px;
+                background: #10b981;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 20px;
+            }}
+            .icon svg {{ width: 40px; height: 40px; color: white; }}
+            h1 {{
+                color: #1e293b;
+                font-size: 24px;
+                margin-bottom: 10px;
+            }}
+            p {{
+                color: #64748b;
+                font-size: 16px;
+                margin-bottom: 30px;
+                line-height: 1.5;
+            }}
+            .btn {{
+                display: inline-block;
+                background: #6366f1;
+                color: white;
+                padding: 16px 32px;
+                border-radius: 12px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 16px;
+                margin: 10px;
+                transition: transform 0.2s, box-shadow 0.2s;
+            }}
+            .btn:hover {{
+                transform: translateY(-2px);
+                box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            }}
+            .btn-secondary {{
+                background: #e2e8f0;
+                color: #475569;
+            }}
+            .btn-secondary:hover {{
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }}
+            .note {{
+                margin-top: 20px;
+                padding: 15px;
+                background: #fef3c7;
+                border-radius: 10px;
+                color: #92400e;
+                font-size: 14px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h1>Payment Initiated!</h1>
+            <p>Your payment is being processed. Once confirmed, your votes will be added automatically.</p>
+            
+            <a href="frontend://poll/{poll_id}" class="btn">Open App</a>
+            <br>
+            <a href="/" class="btn btn-secondary">Go to Website</a>
+            
+            <div class="note">
+                <strong>Note:</strong> If the app doesn't open, please go back to the Expo Go app manually and refresh the poll page.
+            </div>
+        </div>
+        
+        <script>
+            // Try to auto-redirect to the app after 2 seconds
+            setTimeout(function() {{
+                window.location.href = 'frontend://poll/{poll_id}';
+            }}, 2000);
+        </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
