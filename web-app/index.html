@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Poll Winner - Vote & Win</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+        
+        .option-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option-card:hover {
+            border-color: #6366f1;
+            background: #f8fafc;
+        }
+        
+        .option-card.selected {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        }
+        
+        .option-card.winner {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .tab-btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .tab-btn.active {
+            background: #6366f1;
+            color: white;
+        }
+        
+        .tab-btn:not(.active):hover {
+            background: #f1f5f9;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .status-closed {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Hide screens by default */
+        .screen { display: none; }
+        .screen.active { display: block; }
+    </style>
+</head>
+<body>
+    <!-- Auth Screen -->
+    <div id="authScreen" class="screen active">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="card p-8 w-full max-w-md">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-trophy text-white text-3xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-800">The Poll Winner</h1>
+                    <p class="text-gray-500 mt-2">Vote, Win & Earn Real Money!</p>
+                </div>
+                
+                <div id="authTabs" class="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
+                    <button onclick="switchAuthTab('login')" id="loginTab" class="tab-btn active flex-1">Login</button>
+                    <button onclick="switchAuthTab('register')" id="registerTab" class="tab-btn flex-1">Register</button>
+                </div>
+                
+                <form id="authForm" onsubmit="handleAuth(event)">
+                    <div id="nameField" class="mb-4 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="authName" class="input-field" placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="authEmail" class="input-field" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="authPassword" class="input-field" placeholder="Enter password" required>
+                    </div>
+                    
+                    <button type="submit" id="authSubmitBtn" class="btn-primary w-full">
+                        <span id="authBtnText">Login</span>
+                        <i id="authBtnLoader" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center text-sm text-gray-500">
+                    <p>By continuing, you agree to our Terms & Conditions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main App Screen -->
+    <div id="mainScreen" class="screen">
+        <!-- Header -->
+        <header class="gradient-bg text-white sticky top-0 z-50">
+            <div class="max-w-6xl mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-trophy text-2xl"></i>
+                        <span class="text-xl font-bold">The Poll Winner</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div id="walletBalance" class="bg-white/20 px-4 py-2 rounded-lg cursor-pointer" onclick="showScreen('wallet')">
+                            <i class="fas fa-wallet mr-2"></i>
+                            <span id="balanceAmount">₹0</span>
+                        </div>
+                        <div class="relative">
+                            <button onclick="toggleUserMenu()" class="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg">
+                                <i class="fas fa-user"></i>
+                                <span id="userName">User</span>
+                                <i class="fas fa-chevron-down text-sm"></i>
+                            </button>
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2">
+                                <a onclick="showScreen('profile')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
+                                    <i class="fas fa-user mr-2"></i> Profile
+                                </a>
+                                <a onclick="showScreen('history')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
+                                    <i class="fas fa-history mr-2"></i> My Polls
+                                </a>
+                                <a onclick="showScreen('wallet')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
+                                    <i class="fas fa-wallet mr-2"></i> Wallet
+                                </a>
+                                <hr class="my-2">
+                                <a onclick="logout()" class="block px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <div class="max-w-6xl mx-auto px-4 pb-4">
+                <div class="flex gap-2 overflow-x-auto">
+                    <button onclick="showScreen('polls')" id="navPolls" class="nav-item active">
+                        <i class="fas fa-poll"></i> Active Polls
+                    </button>
+                    <button onclick="showScreen('results')" id="navResults" class="nav-item">
+                        <i class="fas fa-chart-bar"></i> Results
+                    </button>
+                    <button onclick="showScreen('history')" id="navHistory" class="nav-item">
+                        <i class="fas fa-history"></i> My Polls
+                    </button>
+                    <button onclick="showScreen('wallet')" id="navWallet" class="nav-item">
+                        <i class="fas fa-wallet"></i> Wallet
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Content Area -->
+        <main class="max-w-6xl mx-auto px-4 py-6">
+            <!-- Polls List -->
+            <div id="pollsContent" class="content-section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Active Polls</h2>
+                <div id="pollsList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Polls will be loaded here -->
+                </div>
+                <div id="noPollsMessage" class="hidden text-center py-12">
+                    <i class="fas fa-poll text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">No active polls available</p>
+                </div>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="resultsContent" class="content-section hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Closed Polls - Results</h2>
+                <div id="resultsList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Results will be loaded here -->
+                </div>
+                <div id="noResultsMessage" class="hidden text-center py-12">
+                    <i class="fas fa-chart-bar text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">No results available yet</p>
+                </div>
+            </div>
+            
+            <!-- History Section -->
+            <div id="historyContent" class="content-section hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">My Poll History</h2>
+                <div id="historyList" class="space-y-4">
+                    <!-- History will be loaded here -->
+                </div>
+                <div id="noHistoryMessage" class="hidden text-center py-12">
+                    <i class="fas fa-history text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">You haven't participated in any polls yet</p>
+                </div>
+            </div>
+            
+            <!-- Wallet Section -->
+            <div id="walletContent" class="content-section hidden">
+                <div class="card p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Wallet Balance</h2>
+                    <div class="text-4xl font-bold text-green-600 mb-4">₹<span id="walletBalanceMain">0</span></div>
+                    <button onclick="showWithdrawModal()" class="btn-primary">
+                        <i class="fas fa-money-bill-wave mr-2"></i> Withdraw
+                    </button>
+                </div>
+                
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Transaction History</h3>
+                <div id="transactionsList" class="space-y-3">
+                    <!-- Transactions will be loaded here -->
+                </div>
+                <div id="noTransactionsMessage" class="hidden text-center py-12">
+                    <i class="fas fa-receipt text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">No transactions yet</p>
+                </div>
+            </div>
+            
+            <!-- Profile Section -->
+            <div id="profileContent" class="content-section hidden">
+                <div class="card p-6 max-w-lg">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6">Profile Settings</h2>
+                    <form onsubmit="updateProfile(event)">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                            <input type="text" id="profileName" class="input-field" readonly>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" id="profileEmail" class="input-field" readonly>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">UPI ID (for withdrawals)</label>
+                            <input type="text" id="profileUPI" class="input-field" placeholder="yourname@upi">
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save mr-2"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Poll Detail Modal -->
+    <div id="pollModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-start mb-6">
+                <h2 id="pollModalTitle" class="text-xl font-bold text-gray-800"></h2>
+                <button onclick="closePollModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <p id="pollModalDesc" class="text-gray-600 mb-6"></p>
+            
+            <div class="mb-4">
+                <span class="text-sm text-gray-500">Price per vote:</span>
+                <span id="pollModalPrice" class="font-bold text-indigo-600 ml-2"></span>
+            </div>
+            
+            <h3 class="font-semibold text-gray-700 mb-3">Select an option:</h3>
+            <div id="pollModalOptions" class="space-y-3 mb-6">
+                <!-- Options will be loaded here -->
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Number of votes:</label>
+                <input type="number" id="voteCount" class="input-field" value="1" min="1" max="100">
+            </div>
+            
+            <div id="totalAmount" class="bg-gray-50 p-4 rounded-lg mb-6">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Total Amount:</span>
+                    <span id="totalAmountValue" class="font-bold text-lg text-indigo-600">₹0</span>
+                </div>
+            </div>
+            
+            <button onclick="submitVote()" id="voteSubmitBtn" class="btn-primary w-full">
+                <i class="fas fa-vote-yea mr-2"></i>
+                <span id="voteBtnText">Confirm & Pay</span>
+                <i id="voteBtnLoader" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Result Detail Modal -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-start mb-6">
+                <h2 id="resultModalTitle" class="text-xl font-bold text-gray-800"></h2>
+                <button onclick="closeResultModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div id="resultModalContent">
+                <!-- Results will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-start mb-6">
+                <h2 class="text-xl font-bold text-gray-800">Withdraw Funds</h2>
+                <button onclick="closeWithdrawModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="submitWithdrawal(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Amount (₹)</label>
+                    <input type="number" id="withdrawAmount" class="input-field" placeholder="Enter amount" min="100" required>
+                    <p class="text-sm text-gray-500 mt-1">Minimum withdrawal: ₹100</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">UPI ID</label>
+                    <input type="text" id="withdrawUPI" class="input-field" placeholder="yourname@upi" required>
+                </div>
+                
+                <div class="bg-yellow-50 p-4 rounded-lg mb-6">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        A 5% processing fee will be deducted from the withdrawal amount.
+                    </p>
+                </div>
+                
+                <button type="submit" class="btn-primary w-full">
+                    <i class="fas fa-paper-plane mr-2"></i> Submit Request
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="modal">
+        <div class="text-center">
+            <div class="loader mx-auto mb-4"></div>
+            <p class="text-white text-lg">Loading...</p>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_URL = window.location.origin + '/api';
+        
+        // State
+        let currentUser = null;
+        let currentPoll = null;
+        let selectedOption = null;
+        let isLoginMode = true;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+        });
+        
+        // Auth Functions
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    currentUser = await response.json();
+                    showMainApp();
+                }
+            } catch (error) {
+                console.log('Not authenticated');
+            }
+        }
+        
+        function switchAuthTab(tab) {
+            isLoginMode = tab === 'login';
+            document.getElementById('loginTab').classList.toggle('active', isLoginMode);
+            document.getElementById('registerTab').classList.toggle('active', !isLoginMode);
+            document.getElementById('nameField').classList.toggle('hidden', isLoginMode);
+            document.getElementById('authBtnText').textContent = isLoginMode ? 'Login' : 'Register';
+        }
+        
+        async function handleAuth(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const name = document.getElementById('authName').value;
+            
+            const btn = document.getElementById('authSubmitBtn');
+            const btnText = document.getElementById('authBtnText');
+            const btnLoader = document.getElementById('authBtnLoader');
+            
+            btn.disabled = true;
+            btnLoader.classList.remove('hidden');
+            
+            try {
+                const endpoint = isLoginMode ? '/auth/login' : '/auth/register';
+                const body = isLoginMode 
+                    ? { email, password }
+                    : { email, password, name };
+                
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(body)
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Authentication failed');
+                }
+                
+                currentUser = await response.json();
+                showToast('Welcome, ' + currentUser.name + '!', 'success');
+                showMainApp();
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btnLoader.classList.add('hidden');
+            }
+        }
+        
+        async function logout() {
+            try {
+                await fetch(`${API_URL}/auth/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+            
+            currentUser = null;
+            document.getElementById('authScreen').classList.add('active');
+            document.getElementById('mainScreen').classList.remove('active');
+            showToast('Logged out successfully', 'success');
+        }
+        
+        // Main App Functions
+        function showMainApp() {
+            document.getElementById('authScreen').classList.remove('active');
+            document.getElementById('mainScreen').classList.add('active');
+            
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('profileName').value = currentUser.name;
+            document.getElementById('profileEmail').value = currentUser.email;
+            document.getElementById('profileUPI').value = currentUser.upi_id || '';
+            
+            loadWalletBalance();
+            loadPolls();
+        }
+        
+        function showScreen(screen) {
+            // Hide all content sections
+            document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+            
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            // Show selected screen
+            const screenMap = {
+                'polls': { content: 'pollsContent', nav: 'navPolls', load: loadPolls },
+                'results': { content: 'resultsContent', nav: 'navResults', load: loadResults },
+                'history': { content: 'historyContent', nav: 'navHistory', load: loadHistory },
+                'wallet': { content: 'walletContent', nav: 'navWallet', load: loadTransactions },
+                'profile': { content: 'profileContent', nav: null, load: null }
+            };
+            
+            const config = screenMap[screen];
+            if (config) {
+                document.getElementById(config.content).classList.remove('hidden');
+                if (config.nav) document.getElementById(config.nav).classList.add('active');
+                if (config.load) config.load();
+            }
+            
+            // Close user menu
+            document.getElementById('userMenu').classList.add('hidden');
+        }
+        
+        function toggleUserMenu() {
+            document.getElementById('userMenu').classList.toggle('hidden');
+        }
+        
+        // Polls Functions
+        async function loadPolls() {
+            try {
+                const response = await fetch(`${API_URL}/polls`, {
+                    credentials: 'include'
+                });
+                const polls = await response.json();
+                
+                const activePolls = polls.filter(p => p.status === 'active' && !p.is_deleted);
+                const container = document.getElementById('pollsList');
+                const noPolls = document.getElementById('noPollsMessage');
+                
+                if (activePolls.length === 0) {
+                    container.innerHTML = '';
+                    noPolls.classList.remove('hidden');
+                    return;
+                }
+                
+                noPolls.classList.add('hidden');
+                container.innerHTML = activePolls.map(poll => `
+                    <div class="card p-6 cursor-pointer" onclick="openPollModal('${poll.poll_id}')">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-bold text-gray-800">${poll.title}</h3>
+                            <span class="status-badge status-active">Active</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">${poll.description}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-indigo-600 font-semibold">₹${poll.price_per_vote}/vote</span>
+                            <span class="text-gray-500 text-sm">${poll.options.length} options</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                showToast('Failed to load polls', 'error');
+            }
+        }
+        
+        async function loadResults() {
+            try {
+                const response = await fetch(`${API_URL}/polls`, {
+                    credentials: 'include'
+                });
+                const polls = await response.json();
+                
+                const closedPolls = polls.filter(p => p.status === 'closed' && !p.is_deleted);
+                const container = document.getElementById('resultsList');
+                const noResults = document.getElementById('noResultsMessage');
+                
+                if (closedPolls.length === 0) {
+                    container.innerHTML = '';
+                    noResults.classList.remove('hidden');
+                    return;
+                }
+                
+                noResults.classList.add('hidden');
+                container.innerHTML = closedPolls.map(poll => `
+                    <div class="card p-6 cursor-pointer" onclick="openResultModal('${poll.poll_id}')">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-bold text-gray-800">${poll.title}</h3>
+                            <span class="status-badge status-closed">Closed</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">${poll.description}</p>
+                        <button class="btn-secondary w-full">
+                            <i class="fas fa-chart-bar mr-2"></i> View Results
+                        </button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                showToast('Failed to load results', 'error');
+            }
+        }
+        
+        async function openPollModal(pollId) {
+            try {
+                showLoading();
+                const response = await fetch(`${API_URL}/polls/${pollId}`, {
+                    credentials: 'include'
+                });
+                currentPoll = await response.json();
+                selectedOption = null;
+                
+                document.getElementById('pollModalTitle').textContent = currentPoll.title;
+                document.getElementById('pollModalDesc').textContent = currentPoll.description;
+                document.getElementById('pollModalPrice').textContent = `₹${currentPoll.price_per_vote}`;
+                document.getElementById('voteCount').value = 1;
+                
+                const optionsHtml = currentPoll.options.map(opt => `
+                    <div class="option-card" onclick="selectOption('${opt.option_id}', this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center option-radio">
+                                <div class="w-3 h-3 rounded-full bg-indigo-600 hidden option-check"></div>
+                            </div>
+                            <span class="font-medium">${opt.text}</span>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('pollModalOptions').innerHTML = optionsHtml;
+                updateTotalAmount();
+                
+                hideLoading();
+                document.getElementById('pollModal').classList.add('show');
+            } catch (error) {
+                hideLoading();
+                showToast('Failed to load poll details', 'error');
+            }
+        }
+        
+        function selectOption(optionId, element) {
+            selectedOption = optionId;
+            
+            // Update UI
+            document.querySelectorAll('.option-card').forEach(el => {
+                el.classList.remove('selected');
+                el.querySelector('.option-check').classList.add('hidden');
+            });
+            
+            element.classList.add('selected');
+            element.querySelector('.option-check').classList.remove('hidden');
+        }
+        
+        function updateTotalAmount() {
+            const voteCount = parseInt(document.getElementById('voteCount').value) || 1;
+            const total = voteCount * (currentPoll?.price_per_vote || 0);
+            document.getElementById('totalAmountValue').textContent = `₹${total}`;
+        }
+        
+        document.getElementById('voteCount')?.addEventListener('input', updateTotalAmount);
+        
+        async function submitVote() {
+            if (!selectedOption) {
+                showToast('Please select an option', 'error');
+                return;
+            }
+            
+            const voteCount = parseInt(document.getElementById('voteCount').value) || 1;
+            const btn = document.getElementById('voteSubmitBtn');
+            const btnText = document.getElementById('voteBtnText');
+            const btnLoader = document.getElementById('voteBtnLoader');
+            
+            btn.disabled = true;
+            btnLoader.classList.remove('hidden');
+            btnText.textContent = 'Processing...';
+            
+            try {
+                // Step 1: Create purchase order
+                const purchaseResponse = await fetch(`${API_URL}/polls/${currentPoll.poll_id}/purchase`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        poll_id: currentPoll.poll_id,
+                        vote_count: voteCount,
+                        option_id: selectedOption
+                    })
+                });
+                
+                if (!purchaseResponse.ok) {
+                    const error = await purchaseResponse.json();
+                    throw new Error(error.detail || 'Purchase failed');
+                }
+                
+                const purchaseData = await purchaseResponse.json();
+                
+                // If auto-approved (test mode), cast vote immediately
+                if (purchaseData.status === 'success') {
+                    await castVote(voteCount);
+                    return;
+                }
+                
+                // If payment session is available, redirect to Cashfree
+                if (purchaseData.payment_session_id) {
+                    // Use Cashfree Web Checkout
+                    initiateCashfreePayment(purchaseData, voteCount);
+                } else {
+                    throw new Error('Payment session not available');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+                btn.disabled = false;
+                btnLoader.classList.add('hidden');
+                btnText.textContent = 'Confirm & Pay';
+            }
+        }
+        
+        function initiateCashfreePayment(purchaseData, voteCount) {
+            // Load Cashfree SDK and initiate payment
+            const script = document.createElement('script');
+            script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+            script.onload = () => {
+                const cashfree = Cashfree({
+                    mode: 'sandbox' // Change to 'production' for live
+                });
+                
+                cashfree.checkout({
+                    paymentSessionId: purchaseData.payment_session_id,
+                    redirectTarget: '_modal'
+                }).then((result) => {
+                    if (result.error) {
+                        showToast('Payment failed: ' + result.error.message, 'error');
+                        resetVoteButton();
+                    } else if (result.redirect) {
+                        // Payment redirected
+                    } else if (result.paymentDetails) {
+                        // Payment successful
+                        castVote(voteCount);
+                    }
+                }).catch((error) => {
+                    showToast('Payment failed', 'error');
+                    resetVoteButton();
+                });
+            };
+            document.head.appendChild(script);
+        }
+        
+        async function castVote(voteCount) {
+            try {
+                const voteResponse = await fetch(`${API_URL}/polls/${currentPoll.poll_id}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        option_id: selectedOption,
+                        vote_count: voteCount
+                    })
+                });
+                
+                if (!voteResponse.ok) {
+                    const error = await voteResponse.json();
+                    throw new Error(error.detail || 'Voting failed');
+                }
+                
+                showToast('Vote cast successfully! 🎉', 'success');
+                closePollModal();
+                loadPolls();
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                resetVoteButton();
+            }
+        }
+        
+        function resetVoteButton() {
+            const btn = document.getElementById('voteSubmitBtn');
+            const btnText = document.getElementById('voteBtnText');
+            const btnLoader = document.getElementById('voteBtnLoader');
+            
+            btn.disabled = false;
+            btnLoader.classList.add('hidden');
+            btnText.textContent = 'Confirm & Pay';
+        }
+        
+        function closePollModal() {
+            document.getElementById('pollModal').classList.remove('show');
+            currentPoll = null;
+            selectedOption = null;
+        }
+        
+        // Results Functions
+        async function openResultModal(pollId) {
+            try {
+                showLoading();
+                
+                const [pollResponse, resultsResponse, myResultResponse] = await Promise.all([
+                    fetch(`${API_URL}/polls/${pollId}`, { credentials: 'include' }),
+                    fetch(`${API_URL}/polls/${pollId}/results`, { credentials: 'include' }),
+                    fetch(`${API_URL}/polls/${pollId}/my-result`, { credentials: 'include' })
+                ]);
+                
+                const poll = await pollResponse.json();
+                const results = await resultsResponse.json();
+                const myResult = await myResultResponse.json();
+                
+                document.getElementById('resultModalTitle').textContent = poll.title;
+                
+                let html = `
+                    <div class="mb-6">
+                        <p class="text-gray-600 mb-4">${poll.description}</p>
+                        <div class="flex gap-4 text-sm">
+                            <span class="text-gray-500">Total Votes: <strong>${results.total_votes}</strong></span>
+                            <span class="text-gray-500">Total Amount: <strong>₹${results.total_amount}</strong></span>
+                        </div>
+                    </div>
+                    
+                    <h3 class="font-semibold text-gray-700 mb-4">Results:</h3>
+                    <div class="space-y-4 mb-6">
+                `;
+                
+                results.option_results.forEach(opt => {
+                    const isWinner = opt.is_winner;
+                    html += `
+                        <div class="option-card ${isWinner ? 'winner' : ''}">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-medium ${isWinner ? 'text-green-700' : ''}">${opt.text}</span>
+                                ${isWinner ? '<span class="text-green-600"><i class="fas fa-trophy mr-1"></i>Winner</span>' : ''}
+                            </div>
+                            <div class="progress-bar mb-2">
+                                <div class="progress-fill" style="width: ${opt.percentage}%; ${isWinner ? 'background: #10b981;' : ''}"></div>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-500">
+                                <span>${opt.vote_count} votes</span>
+                                <span>${opt.percentage.toFixed(1)}%</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                
+                // My Result
+                if (myResult.participated) {
+                    html += `
+                        <div class="bg-indigo-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-indigo-800 mb-2">Your Participation</h4>
+                            <p class="text-sm text-indigo-700 mb-2">You spent ₹${myResult.total_spent} on ${myResult.total_votes} votes</p>
+                    `;
+                    
+                    if (myResult.result_status === 'won') {
+                        html += `
+                            <div class="bg-green-100 p-3 rounded-lg mt-2">
+                                <i class="fas fa-trophy text-green-600 mr-2"></i>
+                                <span class="text-green-700 font-semibold">You won ₹${myResult.winning_amount}!</span>
+                            </div>
+                        `;
+                    } else if (myResult.result_status === 'lost') {
+                        html += `
+                            <div class="bg-red-100 p-3 rounded-lg mt-2">
+                                <i class="fas fa-times-circle text-red-600 mr-2"></i>
+                                <span class="text-red-700">Better luck next time!</span>
+                            </div>
+                        `;
+                    }
+                    
+                    html += '</div>';
+                }
+                
+                document.getElementById('resultModalContent').innerHTML = html;
+                
+                hideLoading();
+                document.getElementById('resultModal').classList.add('show');
+            } catch (error) {
+                hideLoading();
+                showToast('Failed to load results', 'error');
+            }
+        }
+        
+        function closeResultModal() {
+            document.getElementById('resultModal').classList.remove('show');
+        }
+        
+        // History Functions
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${API_URL}/polls/history`, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load history');
+                }
+                
+                const history = await response.json();
+                const container = document.getElementById('historyList');
+                const noHistory = document.getElementById('noHistoryMessage');
+                
+                if (history.length === 0) {
+                    container.innerHTML = '';
+                    noHistory.classList.remove('hidden');
+                    return;
+                }
+                
+                noHistory.classList.add('hidden');
+                container.innerHTML = history.map(item => `
+                    <div class="card p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-semibold text-gray-800">${item.poll_title}</h4>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    ${item.total_votes} vote(s) • ₹${item.total_spent} spent
+                                </p>
+                            </div>
+                            <span class="status-badge ${item.poll_status === 'active' ? 'status-active' : 'status-closed'}">
+                                ${item.poll_status === 'active' ? 'Active' : 'Closed'}
+                            </span>
+                        </div>
+                        ${item.result_status ? `
+                            <div class="mt-3 pt-3 border-t">
+                                ${item.result_status === 'won' 
+                                    ? `<span class="text-green-600 font-semibold"><i class="fas fa-trophy mr-1"></i>Won ₹${item.winning_amount}</span>`
+                                    : `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Lost</span>`
+                                }
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                showToast('Failed to load history', 'error');
+            }
+        }
+        
+        // Wallet Functions
+        async function loadWalletBalance() {
+            try {
+                const response = await fetch(`${API_URL}/wallet`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                document.getElementById('balanceAmount').textContent = `₹${data.balance || 0}`;
+                document.getElementById('walletBalanceMain').textContent = data.balance || 0;
+            } catch (error) {
+                console.error('Failed to load wallet balance');
+            }
+        }
+        
+        async function loadTransactions() {
+            try {
+                loadWalletBalance();
+                
+                const response = await fetch(`${API_URL}/transactions`, {
+                    credentials: 'include'
+                });
+                const transactions = await response.json();
+                
+                const container = document.getElementById('transactionsList');
+                const noTxn = document.getElementById('noTransactionsMessage');
+                
+                if (transactions.length === 0) {
+                    container.innerHTML = '';
+                    noTxn.classList.remove('hidden');
+                    return;
+                }
+                
+                noTxn.classList.add('hidden');
+                container.innerHTML = transactions.map(txn => {
+                    const isCredit = txn.type === 'win';
+                    const icon = {
+                        'purchase': 'fa-shopping-cart',
+                        'win': 'fa-trophy',
+                        'withdrawal': 'fa-money-bill-wave',
+                        'withdrawal_fee': 'fa-percent'
+                    }[txn.type] || 'fa-exchange-alt';
+                    
+                    return `
+                        <div class="card p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full ${isCredit ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center">
+                                    <i class="fas ${icon} ${isCredit ? 'text-green-600' : 'text-red-600'}"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">${txn.type.charAt(0).toUpperCase() + txn.type.slice(1).replace('_', ' ')}</p>
+                                    <p class="text-sm text-gray-500">${new Date(txn.created_at).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            <span class="${isCredit ? 'text-green-600' : 'text-red-600'} font-semibold">
+                                ${isCredit ? '+' : '-'}₹${txn.amount}
+                            </span>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                showToast('Failed to load transactions', 'error');
+            }
+        }
+        
+        function showWithdrawModal() {
+            document.getElementById('withdrawUPI').value = currentUser.upi_id || '';
+            document.getElementById('withdrawModal').classList.add('show');
+        }
+        
+        function closeWithdrawModal() {
+            document.getElementById('withdrawModal').classList.remove('show');
+        }
+        
+        async function submitWithdrawal(event) {
+            event.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const upiId = document.getElementById('withdrawUPI').value;
+            
+            if (amount < 100) {
+                showToast('Minimum withdrawal amount is ₹100', 'error');
+                return;
+            }
+            
+            try {
+                showLoading();
+                
+                const response = await fetch(`${API_URL}/withdrawals`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ amount, upi_id: upiId })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Withdrawal failed');
+                }
+                
+                hideLoading();
+                closeWithdrawModal();
+                showToast('Withdrawal request submitted!', 'success');
+                loadTransactions();
+            } catch (error) {
+                hideLoading();
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Profile Functions
+        async function updateProfile(event) {
+            event.preventDefault();
+            
+            const upiId = document.getElementById('profileUPI').value;
+            
+            try {
+                showLoading();
+                
+                const response = await fetch(`${API_URL}/user/upi`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ upi_id: upiId })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Update failed');
+                }
+                
+                currentUser.upi_id = upiId;
+                hideLoading();
+                showToast('Profile updated!', 'success');
+            } catch (error) {
+                hideLoading();
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Utility Functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+        
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            toast.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50';
+            
+            if (type === 'success') {
+                toast.classList.add('bg-green-600', 'text-white');
+            } else if (type === 'error') {
+                toast.classList.add('bg-red-600', 'text-white');
+            } else {
+                toast.classList.add('bg-gray-800', 'text-white');
+            }
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+        
+        // Close modals on outside click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
+        
+        // Close user menu on outside click
+        document.addEventListener('click', (e) => {
+            const userMenu = document.getElementById('userMenu');
+            if (!e.target.closest('#userMenu') && !e.target.closest('button[onclick="toggleUserMenu()"]')) {
+                userMenu?.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
