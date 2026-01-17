@@ -4,807 +4,1353 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Poll Winner - Vote & Win</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         :root {
             --primary: #6366f1;
             --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
             min-height: 100vh;
+            color: var(--gray-800);
         }
         
-        .gradient-bg {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        /* Auth Page Styles */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
-        .card {
+        .auth-card {
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 24px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
         
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .auth-logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        
+        .auth-logo-icon i {
+            font-size: 36px;
+            color: white;
+        }
+        
+        .auth-logo h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+        }
+        
+        .auth-logo p {
+            color: var(--gray-500);
+            font-size: 15px;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            background: var(--gray-100);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 28px;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            color: var(--gray-600);
+            font-size: 15px;
+        }
+        
+        .auth-tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-family: inherit;
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
+            width: 100%;
         }
         
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
         }
         
         .btn-primary:disabled {
-            opacity: 0.6;
+            opacity: 0.7;
             cursor: not-allowed;
             transform: none;
         }
         
         .btn-secondary {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
+            background: var(--gray-100);
+            color: var(--gray-700);
         }
         
         .btn-secondary:hover {
-            background: #e2e8f0;
+            background: var(--gray-200);
         }
         
-        .input-field {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: border-color 0.2s;
-        }
-        
-        .input-field:focus {
-            outline: none;
-            border-color: #6366f1;
-        }
-        
-        .option-card {
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .option-card:hover {
-            border-color: #6366f1;
-            background: #f8fafc;
-        }
-        
-        .option-card.selected {
-            border-color: #6366f1;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-        }
-        
-        .option-card.winner {
-            border-color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-        }
-        
-        .tab-btn {
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        
-        .tab-btn.active {
-            background: #6366f1;
+        .btn-success {
+            background: var(--success);
             color: white;
         }
         
-        .tab-btn:not(.active):hover {
-            background: #f1f5f9;
+        .btn-outline {
+            background: white;
+            border: 2px solid var(--gray-200);
+            color: var(--gray-700);
         }
         
-        .status-badge {
-            padding: 4px 12px;
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        /* Main App Layout */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .header-logo i {
+            font-size: 24px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .wallet-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .wallet-badge:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .user-menu {
+            position: relative;
+        }
+        
+        .user-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            min-width: 200px;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .user-dropdown.show {
+            display: block;
+        }
+        
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .user-dropdown a:hover {
+            background: var(--gray-50);
+        }
+        
+        .user-dropdown a.danger {
+            color: var(--danger);
+        }
+        
+        .user-dropdown hr {
+            border: none;
+            border-top: 1px solid var(--gray-100);
+            margin: 4px 0;
+        }
+        
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 0 24px 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .nav-tab:hover, .nav-tab.active {
+            background: rgba(255,255,255,0.25);
+            color: white;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 32px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 24px;
+        }
+        
+        /* Poll Cards Grid */
+        .polls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+        }
+        
+        .poll-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .poll-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+            border-color: var(--primary-light);
+        }
+        
+        .poll-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .poll-card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1.4;
+        }
+        
+        .poll-status {
+            padding: 6px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
+            text-transform: uppercase;
         }
         
-        .status-active {
+        .poll-status.active {
             background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
+            color: var(--success);
         }
         
-        .status-closed {
+        .poll-status.closed {
             background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
+            color: var(--danger);
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
+        .poll-card-desc {
+            color: var(--gray-500);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         
-        .modal.show {
+        .poll-card-footer {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-100);
         }
         
-        .modal-content {
+        .poll-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .poll-options-count {
+            color: var(--gray-500);
+            font-size: 13px;
+        }
+        
+        /* Poll Detail Page */
+        .poll-detail {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .poll-detail-card {
             background: white;
             border-radius: 20px;
             padding: 32px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
         
+        .poll-detail-header {
+            margin-bottom: 24px;
+        }
+        
+        .poll-detail-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 12px;
+        }
+        
+        .poll-detail-desc {
+            color: var(--gray-600);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+        
+        .poll-info-bar {
+            display: flex;
+            gap: 24px;
+            padding: 16px 20px;
+            background: var(--gray-50);
+            border-radius: 12px;
+            margin-bottom: 28px;
+        }
+        
+        .poll-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .poll-info-item i {
+            color: var(--primary);
+        }
+        
+        .poll-info-item span {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .options-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 16px;
+        }
+        
+        .option-card {
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .option-card:hover {
+            border-color: var(--primary-light);
+            background: rgba(99, 102, 241, 0.02);
+        }
+        
+        .option-card.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .option-radio {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--gray-300);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .option-card.selected .option-radio {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+        
+        .option-radio-inner {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            display: none;
+        }
+        
+        .option-card.selected .option-radio-inner {
+            display: block;
+        }
+        
+        .option-text {
+            font-weight: 500;
+            color: var(--gray-800);
+            flex: 1;
+        }
+        
+        .vote-form {
+            margin-top: 28px;
+            padding-top: 28px;
+            border-top: 1px solid var(--gray-100);
+        }
+        
+        .vote-count-input {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .vote-count-input label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .vote-count-input input {
+            width: 100px;
+            padding: 12px;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .total-amount {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .total-amount-label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .total-amount-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        
+        /* Results Page */
+        .result-option {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 2px solid var(--gray-100);
+        }
+        
+        .result-option.winner {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.03);
+        }
+        
+        .result-option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .result-option-text {
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .winner-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--success);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: var(--gray-100);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .result-option.winner .progress-fill {
+            background: linear-gradient(90deg, var(--success) 0%, #34d399 100%);
+        }
+        
+        .result-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+        
+        /* My Result Box */
+        .my-result-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+        
+        .my-result-box h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+        }
+        
+        .my-result-box p {
+            color: var(--gray-600);
+            margin-bottom: 16px;
+        }
+        
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        
+        .result-badge.won {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+        
+        .result-badge.lost {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        /* Wallet Page */
+        .wallet-overview {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 20px;
+            padding: 32px;
+            color: white;
+            margin-bottom: 32px;
+        }
+        
+        .wallet-balance-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .wallet-balance-amount {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 24px;
+        }
+        
+        .transaction-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        
+        .transaction-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+        
+        .transaction-icon.credit {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .transaction-icon.debit {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .transaction-info {
+            flex: 1;
+        }
+        
+        .transaction-type {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 4px;
+        }
+        
+        .transaction-date {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+        
+        .transaction-amount {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .transaction-amount.credit {
+            color: var(--success);
+        }
+        
+        .transaction-amount.debit {
+            color: var(--danger);
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-state i {
+            font-size: 64px;
+            color: var(--gray-300);
+            margin-bottom: 16px;
+        }
+        
+        .empty-state p {
+            color: var(--gray-500);
+            font-size: 16px;
+        }
+        
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        
+        .back-btn:hover {
+            color: var(--primary);
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.success {
+            background: var(--success);
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
+        /* Loading */
         .loader {
             width: 40px;
             height: 40px;
-            border: 4px solid #e2e8f0;
-            border-top: 4px solid #6366f1;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
         
-        .nav-item {
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.9);
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
+            z-index: 1000;
         }
         
-        .nav-item:hover, .nav-item.active {
-            background: rgba(255,255,255,0.2);
-        }
+        /* Hide/Show */
+        .hidden { display: none !important; }
         
-        .progress-bar {
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-main {
+                padding: 12px 16px;
+            }
+            
+            .header-logo span {
+                display: none;
+            }
+            
+            .nav-tabs {
+                padding: 0 16px 12px;
+            }
+            
+            .main-content {
+                padding: 20px 16px;
+            }
+            
+            .polls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .poll-detail-card {
+                padding: 20px;
+            }
+            
+            .poll-info-bar {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .wallet-balance-amount {
+                font-size: 36px;
+            }
         }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-        
-        /* Hide screens by default */
-        .screen { display: none; }
-        .screen.active { display: block; }
     </style>
 </head>
 <body>
-    <!-- Auth Screen -->
-    <div id="authScreen" class="screen active">
-        <div class="min-h-screen flex items-center justify-center p-4">
-            <div class="card p-8 w-full max-w-md">
-                <div class="text-center mb-8">
-                    <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-trophy text-white text-3xl"></i>
-                    </div>
-                    <h1 class="text-2xl font-bold text-gray-800">The Poll Winner</h1>
-                    <p class="text-gray-500 mt-2">Vote, Win & Earn Real Money!</p>
-                </div>
-                
-                <div id="authTabs" class="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
-                    <button onclick="switchAuthTab('login')" id="loginTab" class="tab-btn active flex-1">Login</button>
-                    <button onclick="switchAuthTab('register')" id="registerTab" class="tab-btn flex-1">Register</button>
-                </div>
-                
-                <form id="authForm" onsubmit="handleAuth(event)">
-                    <div id="nameField" class="mb-4 hidden">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                        <input type="text" id="authName" class="input-field" placeholder="Enter your name">
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input type="email" id="authEmail" class="input-field" placeholder="Enter your email" required>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <input type="password" id="authPassword" class="input-field" placeholder="Enter password" required>
-                    </div>
-                    
-                    <button type="submit" id="authSubmitBtn" class="btn-primary w-full">
-                        <span id="authBtnText">Login</span>
-                        <i id="authBtnLoader" class="fas fa-spinner fa-spin ml-2 hidden"></i>
-                    </button>
-                </form>
-                
-                <div class="mt-6 text-center text-sm text-gray-500">
-                    <p>By continuing, you agree to our Terms & Conditions</p>
-                </div>
-            </div>
-        </div>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loader"></div>
     </div>
-    
-    <!-- Main App Screen -->
-    <div id="mainScreen" class="screen">
-        <!-- Header -->
-        <header class="gradient-bg text-white sticky top-0 z-50">
-            <div class="max-w-6xl mx-auto px-4 py-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <i class="fas fa-trophy text-2xl"></i>
-                        <span class="text-xl font-bold">The Poll Winner</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div id="walletBalance" class="bg-white/20 px-4 py-2 rounded-lg cursor-pointer" onclick="showScreen('wallet')">
-                            <i class="fas fa-wallet mr-2"></i>
-                            <span id="balanceAmount">₹0</span>
-                        </div>
-                        <div class="relative">
-                            <button onclick="toggleUserMenu()" class="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-lg">
-                                <i class="fas fa-user"></i>
-                                <span id="userName">User</span>
-                                <i class="fas fa-chevron-down text-sm"></i>
-                            </button>
-                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2">
-                                <a onclick="showScreen('profile')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                    <i class="fas fa-user mr-2"></i> Profile
-                                </a>
-                                <a onclick="showScreen('history')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                    <i class="fas fa-history mr-2"></i> My Polls
-                                </a>
-                                <a onclick="showScreen('wallet')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                    <i class="fas fa-wallet mr-2"></i> Wallet
-                                </a>
-                                <hr class="my-2">
-                                <a onclick="logout()" class="block px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Auth Page -->
+    <div id="authPage" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="auth-logo-icon">
+                    <i class="fas fa-trophy"></i>
                 </div>
+                <h1>The Poll Winner</h1>
+                <p>Vote, Win & Earn Real Money!</p>
             </div>
             
-            <!-- Navigation Tabs -->
-            <div class="max-w-6xl mx-auto px-4 pb-4">
-                <div class="flex gap-2 overflow-x-auto">
-                    <button onclick="showScreen('polls')" id="navPolls" class="nav-item active">
-                        <i class="fas fa-poll"></i> Active Polls
-                    </button>
-                    <button onclick="showScreen('results')" id="navResults" class="nav-item">
-                        <i class="fas fa-chart-bar"></i> Results
-                    </button>
-                    <button onclick="showScreen('history')" id="navHistory" class="nav-item">
-                        <i class="fas fa-history"></i> My Polls
-                    </button>
-                    <button onclick="showScreen('wallet')" id="navWallet" class="nav-item">
-                        <i class="fas fa-wallet"></i> Wallet
-                    </button>
-                </div>
-            </div>
-        </header>
-        
-        <!-- Content Area -->
-        <main class="max-w-6xl mx-auto px-4 py-6">
-            <!-- Polls List -->
-            <div id="pollsContent" class="content-section">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Active Polls</h2>
-                <div id="pollsList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Polls will be loaded here -->
-                </div>
-                <div id="noPollsMessage" class="hidden text-center py-12">
-                    <i class="fas fa-poll text-6xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500 text-lg">No active polls available</p>
-                </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
             </div>
             
-            <!-- Results Section -->
-            <div id="resultsContent" class="content-section hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Closed Polls - Results</h2>
-                <div id="resultsList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Results will be loaded here -->
-                </div>
-                <div id="noResultsMessage" class="hidden text-center py-12">
-                    <i class="fas fa-chart-bar text-6xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500 text-lg">No results available yet</p>
-                </div>
-            </div>
-            
-            <!-- History Section -->
-            <div id="historyContent" class="content-section hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">My Poll History</h2>
-                <div id="historyList" class="space-y-4">
-                    <!-- History will be loaded here -->
-                </div>
-                <div id="noHistoryMessage" class="hidden text-center py-12">
-                    <i class="fas fa-history text-6xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500 text-lg">You haven't participated in any polls yet</p>
-                </div>
-            </div>
-            
-            <!-- Wallet Section -->
-            <div id="walletContent" class="content-section hidden">
-                <div class="card p-6 mb-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Wallet Balance</h2>
-                    <div class="text-4xl font-bold text-green-600 mb-4">₹<span id="walletBalanceMain">0</span></div>
-                    <button onclick="showWithdrawModal()" class="btn-primary">
-                        <i class="fas fa-money-bill-wave mr-2"></i> Withdraw
-                    </button>
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div id="nameField" class="form-group hidden">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="authName" class="form-input" placeholder="Enter your full name">
                 </div>
                 
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Transaction History</h3>
-                <div id="transactionsList" class="space-y-3">
-                    <!-- Transactions will be loaded here -->
-                </div>
-                <div id="noTransactionsMessage" class="hidden text-center py-12">
-                    <i class="fas fa-receipt text-6xl text-gray-300 mb-4"></i>
-                    <p class="text-gray-500 text-lg">No transactions yet</p>
-                </div>
-            </div>
-            
-            <!-- Profile Section -->
-            <div id="profileContent" class="content-section hidden">
-                <div class="card p-6 max-w-lg">
-                    <h2 class="text-xl font-bold text-gray-800 mb-6">Profile Settings</h2>
-                    <form onsubmit="updateProfile(event)">
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                            <input type="text" id="profileName" class="input-field" readonly>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                            <input type="email" id="profileEmail" class="input-field" readonly>
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">UPI ID (for withdrawals)</label>
-                            <input type="text" id="profileUPI" class="input-field" placeholder="yourname@upi">
-                        </div>
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-save mr-2"></i> Save Changes
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </main>
-    </div>
-    
-    <!-- Poll Detail Modal -->
-    <div id="pollModal" class="modal">
-        <div class="modal-content">
-            <div class="flex justify-between items-start mb-6">
-                <h2 id="pollModalTitle" class="text-xl font-bold text-gray-800"></h2>
-                <button onclick="closePollModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            <p id="pollModalDesc" class="text-gray-600 mb-6"></p>
-            
-            <div class="mb-4">
-                <span class="text-sm text-gray-500">Price per vote:</span>
-                <span id="pollModalPrice" class="font-bold text-indigo-600 ml-2"></span>
-            </div>
-            
-            <h3 class="font-semibold text-gray-700 mb-3">Select an option:</h3>
-            <div id="pollModalOptions" class="space-y-3 mb-6">
-                <!-- Options will be loaded here -->
-            </div>
-            
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Number of votes:</label>
-                <input type="number" id="voteCount" class="input-field" value="1" min="1" max="100">
-            </div>
-            
-            <div id="totalAmount" class="bg-gray-50 p-4 rounded-lg mb-6">
-                <div class="flex justify-between">
-                    <span class="text-gray-600">Total Amount:</span>
-                    <span id="totalAmountValue" class="font-bold text-lg text-indigo-600">₹0</span>
-                </div>
-            </div>
-            
-            <button onclick="submitVote()" id="voteSubmitBtn" class="btn-primary w-full">
-                <i class="fas fa-vote-yea mr-2"></i>
-                <span id="voteBtnText">Confirm & Pay</span>
-                <i id="voteBtnLoader" class="fas fa-spinner fa-spin ml-2 hidden"></i>
-            </button>
-        </div>
-    </div>
-    
-    <!-- Result Detail Modal -->
-    <div id="resultModal" class="modal">
-        <div class="modal-content">
-            <div class="flex justify-between items-start mb-6">
-                <h2 id="resultModalTitle" class="text-xl font-bold text-gray-800"></h2>
-                <button onclick="closeResultModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <div id="resultModalContent">
-                <!-- Results will be loaded here -->
-            </div>
-        </div>
-    </div>
-    
-    <!-- Withdraw Modal -->
-    <div id="withdrawModal" class="modal">
-        <div class="modal-content">
-            <div class="flex justify-between items-start mb-6">
-                <h2 class="text-xl font-bold text-gray-800">Withdraw Funds</h2>
-                <button onclick="closeWithdrawModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <form onsubmit="submitWithdrawal(event)">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Amount (₹)</label>
-                    <input type="number" id="withdrawAmount" class="input-field" placeholder="Enter amount" min="100" required>
-                    <p class="text-sm text-gray-500 mt-1">Minimum withdrawal: ₹100</p>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="authEmail" class="form-input" placeholder="Enter your email" required>
                 </div>
                 
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">UPI ID</label>
-                    <input type="text" id="withdrawUPI" class="input-field" placeholder="yourname@upi" required>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="authPassword" class="form-input" placeholder="Enter your password" required>
                 </div>
                 
-                <div class="bg-yellow-50 p-4 rounded-lg mb-6">
-                    <p class="text-sm text-yellow-800">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        A 5% processing fee will be deducted from the withdrawal amount.
-                    </p>
-                </div>
-                
-                <button type="submit" class="btn-primary w-full">
-                    <i class="fas fa-paper-plane mr-2"></i> Submit Request
+                <button type="submit" class="btn btn-primary" id="authBtn">
+                    <span>Login</span>
+                    <i class="fas fa-spinner fa-spin hidden" id="authLoader"></i>
                 </button>
             </form>
         </div>
     </div>
-    
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="modal">
-        <div class="text-center">
-            <div class="loader mx-auto mb-4"></div>
-            <p class="text-white text-lg">Loading...</p>
-        </div>
-    </div>
-    
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
-        <span id="toastMessage"></span>
+
+    <!-- Main App -->
+    <div id="mainApp" class="app-container hidden">
+        <header class="app-header">
+            <div class="header-main">
+                <div class="header-logo">
+                    <i class="fas fa-trophy"></i>
+                    <span>The Poll Winner</span>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="wallet-badge" onclick="showPage('wallet')">
+                        <i class="fas fa-wallet"></i>
+                        <span id="headerBalance">₹0</span>
+                    </div>
+                    
+                    <div class="user-menu">
+                        <button class="user-btn" onclick="toggleUserMenu()">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="headerUserName">User</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div id="userDropdown" class="user-dropdown">
+                            <a href="#" onclick="showPage('profile')"><i class="fas fa-user"></i> Profile</a>
+                            <a href="#" onclick="showPage('history')"><i class="fas fa-history"></i> My Polls</a>
+                            <a href="#" onclick="showPage('wallet')"><i class="fas fa-wallet"></i> Wallet</a>
+                            <hr>
+                            <a href="#" onclick="logout()" class="danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-page="polls" onclick="showPage('polls')">
+                    <i class="fas fa-poll"></i> Active Polls
+                </button>
+                <button class="nav-tab" data-page="results" onclick="showPage('results')">
+                    <i class="fas fa-chart-bar"></i> Results
+                </button>
+                <button class="nav-tab" data-page="history" onclick="showPage('history')">
+                    <i class="fas fa-history"></i> My Polls
+                </button>
+                <button class="nav-tab" data-page="wallet" onclick="showPage('wallet')">
+                    <i class="fas fa-wallet"></i> Wallet
+                </button>
+            </div>
+        </header>
+        
+        <main class="main-content">
+            <!-- Polls List Page -->
+            <div id="pollsPage" class="page">
+                <h1 class="page-title">Active Polls</h1>
+                <div id="pollsList" class="polls-grid"></div>
+                <div id="noPollsMessage" class="empty-state hidden">
+                    <i class="fas fa-poll"></i>
+                    <p>No active polls available at the moment</p>
+                </div>
+            </div>
+            
+            <!-- Poll Detail Page -->
+            <div id="pollDetailPage" class="page hidden">
+                <a class="back-btn" onclick="showPage('polls')">
+                    <i class="fas fa-arrow-left"></i> Back to Polls
+                </a>
+                <div id="pollDetailContent" class="poll-detail"></div>
+            </div>
+            
+            <!-- Results Page -->
+            <div id="resultsPage" class="page hidden">
+                <h1 class="page-title">Closed Polls - Results</h1>
+                <div id="resultsList" class="polls-grid"></div>
+                <div id="noResultsMessage" class="empty-state hidden">
+                    <i class="fas fa-chart-bar"></i>
+                    <p>No closed polls yet</p>
+                </div>
+            </div>
+            
+            <!-- Result Detail Page -->
+            <div id="resultDetailPage" class="page hidden">
+                <a class="back-btn" onclick="showPage('results')">
+                    <i class="fas fa-arrow-left"></i> Back to Results
+                </a>
+                <div id="resultDetailContent" class="poll-detail"></div>
+            </div>
+            
+            <!-- History Page -->
+            <div id="historyPage" class="page hidden">
+                <h1 class="page-title">My Poll History</h1>
+                <div id="historyList"></div>
+                <div id="noHistoryMessage" class="empty-state hidden">
+                    <i class="fas fa-history"></i>
+                    <p>You haven't participated in any polls yet</p>
+                </div>
+            </div>
+            
+            <!-- Wallet Page -->
+            <div id="walletPage" class="page hidden">
+                <h1 class="page-title">My Wallet</h1>
+                <div class="wallet-overview">
+                    <div class="wallet-balance-label">Available Balance</div>
+                    <div class="wallet-balance-amount">₹<span id="walletBalance">0</span></div>
+                    <button class="btn btn-secondary" onclick="requestWithdrawal()">
+                        <i class="fas fa-money-bill-wave"></i> Withdraw
+                    </button>
+                </div>
+                <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Transaction History</h2>
+                <div id="transactionsList"></div>
+                <div id="noTransactionsMessage" class="empty-state hidden">
+                    <i class="fas fa-receipt"></i>
+                    <p>No transactions yet</p>
+                </div>
+            </div>
+            
+            <!-- Profile Page -->
+            <div id="profilePage" class="page hidden">
+                <h1 class="page-title">Profile Settings</h1>
+                <div class="poll-detail-card" style="max-width: 500px;">
+                    <div class="form-group">
+                        <label class="form-label">Name</label>
+                        <input type="text" id="profileName" class="form-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="profileEmail" class="form-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">UPI ID (for withdrawals)</label>
+                        <input type="text" id="profileUPI" class="form-input" placeholder="yourname@upi">
+                    </div>
+                    <button class="btn btn-primary" onclick="updateProfile()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        // API Base URL
-        const API_URL = window.location.origin + '/api';
-        
-        // State
+        const API_URL = '/api';
         let currentUser = null;
-        let currentPoll = null;
-        let selectedOption = null;
         let isLoginMode = true;
-        
+        let selectedOption = null;
+        let currentPoll = null;
+
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
-        });
-        
+        document.addEventListener('DOMContentLoaded', checkAuth);
+
         // Auth Functions
         async function checkAuth() {
             try {
-                const response = await fetch(`${API_URL}/auth/me`, {
-                    credentials: 'include'
-                });
-                if (response.ok) {
-                    currentUser = await response.json();
+                const res = await fetch(`${API_URL}/auth/me`, { credentials: 'include' });
+                if (res.ok) {
+                    currentUser = await res.json();
                     showMainApp();
                 }
-            } catch (error) {
+            } catch (e) {
                 console.log('Not authenticated');
             }
         }
-        
+
         function switchAuthTab(tab) {
             isLoginMode = tab === 'login';
-            document.getElementById('loginTab').classList.toggle('active', isLoginMode);
-            document.getElementById('registerTab').classList.toggle('active', !isLoginMode);
+            document.querySelectorAll('.auth-tab').forEach((t, i) => {
+                t.classList.toggle('active', i === (isLoginMode ? 0 : 1));
+            });
             document.getElementById('nameField').classList.toggle('hidden', isLoginMode);
-            document.getElementById('authBtnText').textContent = isLoginMode ? 'Login' : 'Register';
+            document.querySelector('#authBtn span').textContent = isLoginMode ? 'Login' : 'Register';
         }
-        
-        async function handleAuth(event) {
-            event.preventDefault();
-            
+
+        async function handleAuth(e) {
+            e.preventDefault();
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
             const name = document.getElementById('authName').value;
-            
-            const btn = document.getElementById('authSubmitBtn');
-            const btnText = document.getElementById('authBtnText');
-            const btnLoader = document.getElementById('authBtnLoader');
-            
-            btn.disabled = true;
-            btnLoader.classList.remove('hidden');
-            
+
+            showLoading(true);
             try {
                 const endpoint = isLoginMode ? '/auth/login' : '/auth/register';
-                const body = isLoginMode 
-                    ? { email, password }
-                    : { email, password, name };
+                const body = isLoginMode ? { email, password } : { email, password, name };
                 
-                const response = await fetch(`${API_URL}${endpoint}`, {
+                const res = await fetch(`${API_URL}${endpoint}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify(body)
                 });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Authentication failed');
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Authentication failed');
                 }
-                
-                currentUser = await response.json();
+
+                currentUser = await res.json();
                 showToast('Welcome, ' + currentUser.name + '!', 'success');
                 showMainApp();
-            } catch (error) {
-                showToast(error.message, 'error');
+            } catch (err) {
+                showToast(err.message, 'error');
             } finally {
-                btn.disabled = false;
-                btnLoader.classList.add('hidden');
+                showLoading(false);
             }
         }
-        
-        async function logout() {
-            try {
-                await fetch(`${API_URL}/auth/logout`, {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-            } catch (error) {
-                console.error('Logout error:', error);
-            }
-            
+
+        function logout() {
+            fetch(`${API_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
             currentUser = null;
-            document.getElementById('authScreen').classList.add('active');
-            document.getElementById('mainScreen').classList.remove('active');
-            showToast('Logged out successfully', 'success');
+            document.getElementById('authPage').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('userDropdown').classList.remove('show');
         }
-        
-        // Main App Functions
+
         function showMainApp() {
-            document.getElementById('authScreen').classList.remove('active');
-            document.getElementById('mainScreen').classList.add('active');
-            
-            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('authPage').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('headerUserName').textContent = currentUser.name;
             document.getElementById('profileName').value = currentUser.name;
             document.getElementById('profileEmail').value = currentUser.email;
             document.getElementById('profileUPI').value = currentUser.upi_id || '';
-            
-            loadWalletBalance();
+            loadWallet();
             loadPolls();
         }
-        
-        function showScreen(screen) {
-            // Hide all content sections
-            document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
-            
-            // Update nav items
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
-            // Show selected screen
-            const screenMap = {
-                'polls': { content: 'pollsContent', nav: 'navPolls', load: loadPolls },
-                'results': { content: 'resultsContent', nav: 'navResults', load: loadResults },
-                'history': { content: 'historyContent', nav: 'navHistory', load: loadHistory },
-                'wallet': { content: 'walletContent', nav: 'navWallet', load: loadTransactions },
-                'profile': { content: 'profileContent', nav: null, load: null }
-            };
-            
-            const config = screenMap[screen];
-            if (config) {
-                document.getElementById(config.content).classList.remove('hidden');
-                if (config.nav) document.getElementById(config.nav).classList.add('active');
-                if (config.load) config.load();
-            }
-            
-            // Close user menu
-            document.getElementById('userMenu').classList.add('hidden');
-        }
-        
+
         function toggleUserMenu() {
-            document.getElementById('userMenu').classList.toggle('hidden');
+            document.getElementById('userDropdown').classList.toggle('show');
         }
-        
-        // Polls Functions
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-menu')) {
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        });
+
+        // Page Navigation
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            
+            const pageEl = document.getElementById(page + 'Page');
+            if (pageEl) pageEl.classList.remove('hidden');
+            
+            const navTab = document.querySelector(`.nav-tab[data-page="${page}"]`);
+            if (navTab) navTab.classList.add('active');
+            
+            document.getElementById('userDropdown').classList.remove('show');
+
+            // Load data based on page
+            if (page === 'polls') loadPolls();
+            else if (page === 'results') loadResults();
+            else if (page === 'history') loadHistory();
+            else if (page === 'wallet') loadWallet();
+        }
+
+        // Polls
         async function loadPolls() {
             try {
-                const response = await fetch(`${API_URL}/polls`, {
-                    credentials: 'include'
-                });
-                const polls = await response.json();
+                const res = await fetch(`${API_URL}/polls`, { credentials: 'include' });
+                const polls = await res.json();
+                const active = polls.filter(p => p.status === 'active' && !p.is_deleted);
                 
-                const activePolls = polls.filter(p => p.status === 'active' && !p.is_deleted);
                 const container = document.getElementById('pollsList');
-                const noPolls = document.getElementById('noPollsMessage');
+                const empty = document.getElementById('noPollsMessage');
                 
-                if (activePolls.length === 0) {
+                if (active.length === 0) {
                     container.innerHTML = '';
-                    noPolls.classList.remove('hidden');
+                    empty.classList.remove('hidden');
                     return;
                 }
                 
-                noPolls.classList.add('hidden');
-                container.innerHTML = activePolls.map(poll => `
-                    <div class="card p-6 cursor-pointer" onclick="openPollModal('${poll.poll_id}')">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="font-bold text-gray-800">${poll.title}</h3>
-                            <span class="status-badge status-active">Active</span>
+                empty.classList.add('hidden');
+                container.innerHTML = active.map(p => `
+                    <div class="poll-card" onclick="openPoll('${p.poll_id}')">
+                        <div class="poll-card-header">
+                            <h3 class="poll-card-title">${p.title}</h3>
+                            <span class="poll-status active">Active</span>
                         </div>
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">${poll.description}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-indigo-600 font-semibold">₹${poll.price_per_vote}/vote</span>
-                            <span class="text-gray-500 text-sm">${poll.options.length} options</span>
+                        <p class="poll-card-desc">${p.description}</p>
+                        <div class="poll-card-footer">
+                            <span class="poll-price">₹${p.price_per_vote}/vote</span>
+                            <span class="poll-options-count">${p.options.length} options</span>
                         </div>
                     </div>
                 `).join('');
-            } catch (error) {
+            } catch (err) {
                 showToast('Failed to load polls', 'error');
             }
         }
-        
-        async function loadResults() {
+
+        async function openPoll(pollId) {
+            showLoading(true);
             try {
-                const response = await fetch(`${API_URL}/polls`, {
-                    credentials: 'include'
-                });
-                const polls = await response.json();
-                
-                const closedPolls = polls.filter(p => p.status === 'closed' && !p.is_deleted);
-                const container = document.getElementById('resultsList');
-                const noResults = document.getElementById('noResultsMessage');
-                
-                if (closedPolls.length === 0) {
-                    container.innerHTML = '';
-                    noResults.classList.remove('hidden');
-                    return;
-                }
-                
-                noResults.classList.add('hidden');
-                container.innerHTML = closedPolls.map(poll => `
-                    <div class="card p-6 cursor-pointer" onclick="openResultModal('${poll.poll_id}')">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="font-bold text-gray-800">${poll.title}</h3>
-                            <span class="status-badge status-closed">Closed</span>
-                        </div>
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">${poll.description}</p>
-                        <button class="btn-secondary w-full">
-                            <i class="fas fa-chart-bar mr-2"></i> View Results
-                        </button>
-                    </div>
-                `).join('');
-            } catch (error) {
-                showToast('Failed to load results', 'error');
-            }
-        }
-        
-        async function openPollModal(pollId) {
-            try {
-                showLoading();
-                const response = await fetch(`${API_URL}/polls/${pollId}`, {
-                    credentials: 'include'
-                });
-                currentPoll = await response.json();
+                const res = await fetch(`${API_URL}/polls/${pollId}`, { credentials: 'include' });
+                currentPoll = await res.json();
                 selectedOption = null;
                 
-                document.getElementById('pollModalTitle').textContent = currentPoll.title;
-                document.getElementById('pollModalDesc').textContent = currentPoll.description;
-                document.getElementById('pollModalPrice').textContent = `₹${currentPoll.price_per_vote}`;
-                document.getElementById('voteCount').value = 1;
-                
-                const optionsHtml = currentPoll.options.map(opt => `
-                    <div class="option-card" onclick="selectOption('${opt.option_id}', this)">
-                        <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center option-radio">
-                                <div class="w-3 h-3 rounded-full bg-indigo-600 hidden option-check"></div>
+                const content = document.getElementById('pollDetailContent');
+                content.innerHTML = `
+                    <div class="poll-detail-card">
+                        <div class="poll-detail-header">
+                            <h1 class="poll-detail-title">${currentPoll.title}</h1>
+                            <p class="poll-detail-desc">${currentPoll.description}</p>
+                        </div>
+                        
+                        <div class="poll-info-bar">
+                            <div class="poll-info-item">
+                                <i class="fas fa-rupee-sign"></i>
+                                <span>₹${currentPoll.price_per_vote} per vote</span>
                             </div>
-                            <span class="font-medium">${opt.text}</span>
+                            <div class="poll-info-item">
+                                <i class="fas fa-list"></i>
+                                <span>${currentPoll.options.length} options</span>
+                            </div>
+                        </div>
+                        
+                        <div class="options-section">
+                            <h3>Select your option:</h3>
+                            ${currentPoll.options.map(opt => `
+                                <div class="option-card" data-id="${opt.option_id}" onclick="selectOption('${opt.option_id}', this)">
+                                    <div class="option-radio">
+                                        <div class="option-radio-inner"></div>
+                                    </div>
+                                    <span class="option-text">${opt.text}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="vote-form">
+                            <div class="vote-count-input">
+                                <label>Number of votes:</label>
+                                <input type="number" id="voteCount" value="1" min="1" max="100" onchange="updateTotal()">
+                            </div>
+                            
+                            <div class="total-amount">
+                                <span class="total-amount-label">Total Amount:</span>
+                                <span class="total-amount-value" id="totalAmount">₹${currentPoll.price_per_vote}</span>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="submitVote()" id="voteBtn">
+                                <i class="fas fa-vote-yea"></i> Confirm & Pay
+                            </button>
                         </div>
                     </div>
-                `).join('');
+                `;
                 
-                document.getElementById('pollModalOptions').innerHTML = optionsHtml;
-                updateTotalAmount();
-                
-                hideLoading();
-                document.getElementById('pollModal').classList.add('show');
-            } catch (error) {
-                hideLoading();
-                showToast('Failed to load poll details', 'error');
+                showPage('pollDetail');
+            } catch (err) {
+                showToast('Failed to load poll', 'error');
+            } finally {
+                showLoading(false);
             }
         }
-        
-        function selectOption(optionId, element) {
+
+        function selectOption(optionId, el) {
             selectedOption = optionId;
-            
-            // Update UI
-            document.querySelectorAll('.option-card').forEach(el => {
-                el.classList.remove('selected');
-                el.querySelector('.option-check').classList.add('hidden');
-            });
-            
-            element.classList.add('selected');
-            element.querySelector('.option-check').classList.remove('hidden');
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
         }
-        
-        function updateTotalAmount() {
-            const voteCount = parseInt(document.getElementById('voteCount').value) || 1;
-            const total = voteCount * (currentPoll?.price_per_vote || 0);
-            document.getElementById('totalAmountValue').textContent = `₹${total}`;
+
+        function updateTotal() {
+            const count = parseInt(document.getElementById('voteCount').value) || 1;
+            document.getElementById('totalAmount').textContent = '₹' + (count * currentPoll.price_per_vote);
         }
-        
-        document.getElementById('voteCount')?.addEventListener('input', updateTotalAmount);
-        
+
         async function submitVote() {
             if (!selectedOption) {
                 showToast('Please select an option', 'error');
                 return;
             }
-            
+
             const voteCount = parseInt(document.getElementById('voteCount').value) || 1;
-            const btn = document.getElementById('voteSubmitBtn');
-            const btnText = document.getElementById('voteBtnText');
-            const btnLoader = document.getElementById('voteBtnLoader');
-            
-            btn.disabled = true;
-            btnLoader.classList.remove('hidden');
-            btnText.textContent = 'Processing...';
-            
+            showLoading(true);
+
             try {
-                // Step 1: Create purchase order
-                const purchaseResponse = await fetch(`${API_URL}/polls/${currentPoll.poll_id}/purchase`, {
+                // Create purchase order
+                const res = await fetch(`${API_URL}/polls/${currentPoll.poll_id}/purchase`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -814,68 +1360,41 @@
                         option_id: selectedOption
                     })
                 });
-                
-                if (!purchaseResponse.ok) {
-                    const error = await purchaseResponse.json();
-                    throw new Error(error.detail || 'Purchase failed');
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Purchase failed');
                 }
-                
-                const purchaseData = await purchaseResponse.json();
-                
-                // If auto-approved (test mode), cast vote immediately
-                if (purchaseData.status === 'success') {
+
+                const data = await res.json();
+
+                // If auto-approved (test mode)
+                if (data.status === 'success') {
                     await castVote(voteCount);
                     return;
                 }
-                
-                // If payment session is available, redirect to Cashfree
-                if (purchaseData.payment_session_id) {
-                    // Use Cashfree Web Checkout
-                    initiateCashfreePayment(purchaseData, voteCount);
-                } else {
-                    throw new Error('Payment session not available');
+
+                // If payment session available, redirect to Cashfree
+                if (data.payment_session_id) {
+                    // Store vote details for after payment
+                    sessionStorage.setItem('pendingVote', JSON.stringify({
+                        pollId: currentPoll.poll_id,
+                        optionId: selectedOption,
+                        voteCount: voteCount
+                    }));
+                    
+                    // Redirect to Cashfree checkout (same window)
+                    window.location.href = `https://payments.cashfree.com/forms?sessionId=${data.payment_session_id}`;
                 }
-            } catch (error) {
-                showToast(error.message, 'error');
-                btn.disabled = false;
-                btnLoader.classList.add('hidden');
-                btnText.textContent = 'Confirm & Pay';
+            } catch (err) {
+                showToast(err.message, 'error');
+                showLoading(false);
             }
         }
-        
-        function initiateCashfreePayment(purchaseData, voteCount) {
-            // Load Cashfree SDK and initiate payment
-            const script = document.createElement('script');
-            script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
-            script.onload = () => {
-                const cashfree = Cashfree({
-                    mode: 'sandbox' // Change to 'production' for live
-                });
-                
-                cashfree.checkout({
-                    paymentSessionId: purchaseData.payment_session_id,
-                    redirectTarget: '_modal'
-                }).then((result) => {
-                    if (result.error) {
-                        showToast('Payment failed: ' + result.error.message, 'error');
-                        resetVoteButton();
-                    } else if (result.redirect) {
-                        // Payment redirected
-                    } else if (result.paymentDetails) {
-                        // Payment successful
-                        castVote(voteCount);
-                    }
-                }).catch((error) => {
-                    showToast('Payment failed', 'error');
-                    resetVoteButton();
-                });
-            };
-            document.head.appendChild(script);
-        }
-        
+
         async function castVote(voteCount) {
             try {
-                const voteResponse = await fetch(`${API_URL}/polls/${currentPoll.poll_id}/vote`, {
+                const res = await fetch(`${API_URL}/polls/${currentPoll.poll_id}/vote`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -884,365 +1403,301 @@
                         vote_count: voteCount
                     })
                 });
-                
-                if (!voteResponse.ok) {
-                    const error = await voteResponse.json();
-                    throw new Error(error.detail || 'Voting failed');
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Voting failed');
                 }
-                
+
                 showToast('Vote cast successfully! 🎉', 'success');
-                closePollModal();
-                loadPolls();
-            } catch (error) {
-                showToast(error.message, 'error');
+                showPage('polls');
+            } catch (err) {
+                showToast(err.message, 'error');
             } finally {
-                resetVoteButton();
+                showLoading(false);
             }
         }
-        
-        function resetVoteButton() {
-            const btn = document.getElementById('voteSubmitBtn');
-            const btnText = document.getElementById('voteBtnText');
-            const btnLoader = document.getElementById('voteBtnLoader');
-            
-            btn.disabled = false;
-            btnLoader.classList.add('hidden');
-            btnText.textContent = 'Confirm & Pay';
-        }
-        
-        function closePollModal() {
-            document.getElementById('pollModal').classList.remove('show');
-            currentPoll = null;
-            selectedOption = null;
-        }
-        
-        // Results Functions
-        async function openResultModal(pollId) {
+
+        // Results
+        async function loadResults() {
             try {
-                showLoading();
+                const res = await fetch(`${API_URL}/polls`, { credentials: 'include' });
+                const polls = await res.json();
+                const closed = polls.filter(p => p.status === 'closed' && !p.is_deleted);
                 
-                const [pollResponse, resultsResponse, myResultResponse] = await Promise.all([
+                const container = document.getElementById('resultsList');
+                const empty = document.getElementById('noResultsMessage');
+                
+                if (closed.length === 0) {
+                    container.innerHTML = '';
+                    empty.classList.remove('hidden');
+                    return;
+                }
+                
+                empty.classList.add('hidden');
+                container.innerHTML = closed.map(p => `
+                    <div class="poll-card" onclick="openResult('${p.poll_id}')">
+                        <div class="poll-card-header">
+                            <h3 class="poll-card-title">${p.title}</h3>
+                            <span class="poll-status closed">Closed</span>
+                        </div>
+                        <p class="poll-card-desc">${p.description}</p>
+                        <div class="poll-card-footer">
+                            <button class="btn btn-outline" style="padding: 8px 16px; font-size: 13px;">
+                                <i class="fas fa-chart-bar"></i> View Results
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                showToast('Failed to load results', 'error');
+            }
+        }
+
+        async function openResult(pollId) {
+            showLoading(true);
+            try {
+                const [pollRes, resultsRes, myResultRes] = await Promise.all([
                     fetch(`${API_URL}/polls/${pollId}`, { credentials: 'include' }),
                     fetch(`${API_URL}/polls/${pollId}/results`, { credentials: 'include' }),
                     fetch(`${API_URL}/polls/${pollId}/my-result`, { credentials: 'include' })
                 ]);
-                
-                const poll = await pollResponse.json();
-                const results = await resultsResponse.json();
-                const myResult = await myResultResponse.json();
-                
-                document.getElementById('resultModalTitle').textContent = poll.title;
-                
+
+                const poll = await pollRes.json();
+                const results = await resultsRes.json();
+                const myResult = await myResultRes.json();
+
                 let html = `
-                    <div class="mb-6">
-                        <p class="text-gray-600 mb-4">${poll.description}</p>
-                        <div class="flex gap-4 text-sm">
-                            <span class="text-gray-500">Total Votes: <strong>${results.total_votes}</strong></span>
-                            <span class="text-gray-500">Total Amount: <strong>₹${results.total_amount}</strong></span>
+                    <div class="poll-detail-card">
+                        <div class="poll-detail-header">
+                            <h1 class="poll-detail-title">${poll.title}</h1>
+                            <p class="poll-detail-desc">${poll.description}</p>
                         </div>
-                    </div>
-                    
-                    <h3 class="font-semibold text-gray-700 mb-4">Results:</h3>
-                    <div class="space-y-4 mb-6">
+                        
+                        <div class="poll-info-bar">
+                            <div class="poll-info-item">
+                                <i class="fas fa-vote-yea"></i>
+                                <span>${results.total_votes} total votes</span>
+                            </div>
+                            <div class="poll-info-item">
+                                <i class="fas fa-rupee-sign"></i>
+                                <span>₹${results.total_amount} collected</span>
+                            </div>
+                        </div>
+                        
+                        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Results:</h3>
                 `;
-                
+
                 results.option_results.forEach(opt => {
-                    const isWinner = opt.is_winner;
                     html += `
-                        <div class="option-card ${isWinner ? 'winner' : ''}">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="font-medium ${isWinner ? 'text-green-700' : ''}">${opt.text}</span>
-                                ${isWinner ? '<span class="text-green-600"><i class="fas fa-trophy mr-1"></i>Winner</span>' : ''}
+                        <div class="result-option ${opt.is_winner ? 'winner' : ''}">
+                            <div class="result-option-header">
+                                <span class="result-option-text">${opt.text}</span>
+                                ${opt.is_winner ? '<span class="winner-badge"><i class="fas fa-trophy"></i> Winner</span>' : ''}
                             </div>
-                            <div class="progress-bar mb-2">
-                                <div class="progress-fill" style="width: ${opt.percentage}%; ${isWinner ? 'background: #10b981;' : ''}"></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${opt.percentage}%"></div>
                             </div>
-                            <div class="flex justify-between text-sm text-gray-500">
+                            <div class="result-stats">
                                 <span>${opt.vote_count} votes</span>
                                 <span>${opt.percentage.toFixed(1)}%</span>
                             </div>
                         </div>
                     `;
                 });
-                
-                html += '</div>';
-                
-                // My Result
+
                 if (myResult.participated) {
                     html += `
-                        <div class="bg-indigo-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-indigo-800 mb-2">Your Participation</h4>
-                            <p class="text-sm text-indigo-700 mb-2">You spent ₹${myResult.total_spent} on ${myResult.total_votes} votes</p>
+                        <div class="my-result-box">
+                            <h4>Your Participation</h4>
+                            <p>You spent ₹${myResult.total_spent} on ${myResult.total_votes} vote(s)</p>
+                            ${myResult.result_status === 'won' 
+                                ? `<div class="result-badge won"><i class="fas fa-trophy"></i> You won ₹${myResult.winning_amount}!</div>`
+                                : myResult.result_status === 'lost'
+                                    ? `<div class="result-badge lost"><i class="fas fa-times-circle"></i> Better luck next time!</div>`
+                                    : ''
+                            }
+                        </div>
                     `;
-                    
-                    if (myResult.result_status === 'won') {
-                        html += `
-                            <div class="bg-green-100 p-3 rounded-lg mt-2">
-                                <i class="fas fa-trophy text-green-600 mr-2"></i>
-                                <span class="text-green-700 font-semibold">You won ₹${myResult.winning_amount}!</span>
-                            </div>
-                        `;
-                    } else if (myResult.result_status === 'lost') {
-                        html += `
-                            <div class="bg-red-100 p-3 rounded-lg mt-2">
-                                <i class="fas fa-times-circle text-red-600 mr-2"></i>
-                                <span class="text-red-700">Better luck next time!</span>
-                            </div>
-                        `;
-                    }
-                    
-                    html += '</div>';
                 }
-                
-                document.getElementById('resultModalContent').innerHTML = html;
-                
-                hideLoading();
-                document.getElementById('resultModal').classList.add('show');
-            } catch (error) {
-                hideLoading();
+
+                html += '</div>';
+                document.getElementById('resultDetailContent').innerHTML = html;
+                showPage('resultDetail');
+            } catch (err) {
                 showToast('Failed to load results', 'error');
+            } finally {
+                showLoading(false);
             }
         }
-        
-        function closeResultModal() {
-            document.getElementById('resultModal').classList.remove('show');
-        }
-        
-        // History Functions
+
+        // History
         async function loadHistory() {
             try {
-                const response = await fetch(`${API_URL}/polls/history`, {
-                    credentials: 'include'
-                });
+                const res = await fetch(`${API_URL}/polls/history`, { credentials: 'include' });
+                const history = await res.json();
                 
-                if (!response.ok) {
-                    throw new Error('Failed to load history');
-                }
-                
-                const history = await response.json();
                 const container = document.getElementById('historyList');
-                const noHistory = document.getElementById('noHistoryMessage');
+                const empty = document.getElementById('noHistoryMessage');
                 
                 if (history.length === 0) {
                     container.innerHTML = '';
-                    noHistory.classList.remove('hidden');
+                    empty.classList.remove('hidden');
                     return;
                 }
                 
-                noHistory.classList.add('hidden');
-                container.innerHTML = history.map(item => `
-                    <div class="card p-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-semibold text-gray-800">${item.poll_title}</h4>
-                                <p class="text-sm text-gray-500 mt-1">
-                                    ${item.total_votes} vote(s) • ₹${item.total_spent} spent
-                                </p>
-                            </div>
-                            <span class="status-badge ${item.poll_status === 'active' ? 'status-active' : 'status-closed'}">
-                                ${item.poll_status === 'active' ? 'Active' : 'Closed'}
-                            </span>
+                empty.classList.add('hidden');
+                container.innerHTML = history.map(h => `
+                    <div class="poll-card" style="cursor: default;">
+                        <div class="poll-card-header">
+                            <h3 class="poll-card-title">${h.poll_title}</h3>
+                            <span class="poll-status ${h.poll_status === 'active' ? 'active' : 'closed'}">${h.poll_status}</span>
                         </div>
-                        ${item.result_status ? `
-                            <div class="mt-3 pt-3 border-t">
-                                ${item.result_status === 'won' 
-                                    ? `<span class="text-green-600 font-semibold"><i class="fas fa-trophy mr-1"></i>Won ₹${item.winning_amount}</span>`
-                                    : `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Lost</span>`
+                        <p class="poll-card-desc">${h.total_votes} vote(s) • ₹${h.total_spent} spent</p>
+                        ${h.result_status ? `
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gray-100);">
+                                ${h.result_status === 'won' 
+                                    ? `<span style="color: var(--success); font-weight: 600;"><i class="fas fa-trophy"></i> Won ₹${h.winning_amount}</span>`
+                                    : `<span style="color: var(--danger);"><i class="fas fa-times-circle"></i> Lost</span>`
                                 }
                             </div>
                         ` : ''}
                     </div>
                 `).join('');
-            } catch (error) {
+            } catch (err) {
                 showToast('Failed to load history', 'error');
             }
         }
-        
-        // Wallet Functions
-        async function loadWalletBalance() {
+
+        // Wallet
+        async function loadWallet() {
             try {
-                const response = await fetch(`${API_URL}/wallet`, {
-                    credentials: 'include'
-                });
-                const data = await response.json();
-                
-                document.getElementById('balanceAmount').textContent = `₹${data.balance || 0}`;
-                document.getElementById('walletBalanceMain').textContent = data.balance || 0;
-            } catch (error) {
-                console.error('Failed to load wallet balance');
-            }
-        }
-        
-        async function loadTransactions() {
-            try {
-                loadWalletBalance();
-                
-                const response = await fetch(`${API_URL}/transactions`, {
-                    credentials: 'include'
-                });
-                const transactions = await response.json();
-                
+                const [walletRes, txnRes] = await Promise.all([
+                    fetch(`${API_URL}/wallet`, { credentials: 'include' }),
+                    fetch(`${API_URL}/transactions`, { credentials: 'include' })
+                ]);
+
+                const wallet = await walletRes.json();
+                const transactions = await txnRes.json();
+
+                document.getElementById('headerBalance').textContent = '₹' + (wallet.balance || 0);
+                document.getElementById('walletBalance').textContent = wallet.balance || 0;
+
                 const container = document.getElementById('transactionsList');
-                const noTxn = document.getElementById('noTransactionsMessage');
-                
+                const empty = document.getElementById('noTransactionsMessage');
+
                 if (transactions.length === 0) {
                     container.innerHTML = '';
-                    noTxn.classList.remove('hidden');
+                    empty.classList.remove('hidden');
                     return;
                 }
-                
-                noTxn.classList.add('hidden');
-                container.innerHTML = transactions.map(txn => {
-                    const isCredit = txn.type === 'win';
-                    const icon = {
+
+                empty.classList.add('hidden');
+                container.innerHTML = transactions.map(t => {
+                    const isCredit = t.type === 'win';
+                    const icons = {
                         'purchase': 'fa-shopping-cart',
                         'win': 'fa-trophy',
-                        'withdrawal': 'fa-money-bill-wave',
-                        'withdrawal_fee': 'fa-percent'
-                    }[txn.type] || 'fa-exchange-alt';
-                    
+                        'withdrawal': 'fa-money-bill-wave'
+                    };
                     return `
-                        <div class="card p-4 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full ${isCredit ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center">
-                                    <i class="fas ${icon} ${isCredit ? 'text-green-600' : 'text-red-600'}"></i>
+                        <div class="transaction-item">
+                            <div style="display: flex; align-items: center;">
+                                <div class="transaction-icon ${isCredit ? 'credit' : 'debit'}">
+                                    <i class="fas ${icons[t.type] || 'fa-exchange-alt'}"></i>
                                 </div>
-                                <div>
-                                    <p class="font-medium text-gray-800">${txn.type.charAt(0).toUpperCase() + txn.type.slice(1).replace('_', ' ')}</p>
-                                    <p class="text-sm text-gray-500">${new Date(txn.created_at).toLocaleDateString()}</p>
+                                <div class="transaction-info">
+                                    <div class="transaction-type">${t.type.charAt(0).toUpperCase() + t.type.slice(1)}</div>
+                                    <div class="transaction-date">${new Date(t.created_at).toLocaleDateString()}</div>
                                 </div>
                             </div>
-                            <span class="${isCredit ? 'text-green-600' : 'text-red-600'} font-semibold">
-                                ${isCredit ? '+' : '-'}₹${txn.amount}
-                            </span>
+                            <div class="transaction-amount ${isCredit ? 'credit' : 'debit'}">
+                                ${isCredit ? '+' : '-'}₹${t.amount}
+                            </div>
                         </div>
                     `;
                 }).join('');
-            } catch (error) {
-                showToast('Failed to load transactions', 'error');
+            } catch (err) {
+                showToast('Failed to load wallet', 'error');
             }
         }
-        
-        function showWithdrawModal() {
-            document.getElementById('withdrawUPI').value = currentUser.upi_id || '';
-            document.getElementById('withdrawModal').classList.add('show');
-        }
-        
-        function closeWithdrawModal() {
-            document.getElementById('withdrawModal').classList.remove('show');
-        }
-        
-        async function submitWithdrawal(event) {
-            event.preventDefault();
-            
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-            const upiId = document.getElementById('withdrawUPI').value;
-            
-            if (amount < 100) {
-                showToast('Minimum withdrawal amount is ₹100', 'error');
+
+        function requestWithdrawal() {
+            const amount = prompt('Enter withdrawal amount (minimum ₹100):');
+            if (!amount || parseInt(amount) < 100) {
+                showToast('Minimum withdrawal is ₹100', 'error');
                 return;
             }
             
-            try {
-                showLoading();
-                
-                const response = await fetch(`${API_URL}/withdrawals`, {
+            const upi = prompt('Enter your UPI ID:');
+            if (!upi) return;
+
+            showLoading(true);
+            fetch(`${API_URL}/withdrawals`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ amount: parseInt(amount), upi_id: upi })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Withdrawal failed');
+                showToast('Withdrawal request submitted!', 'success');
+                loadWallet();
+            })
+            .catch(err => showToast(err.message, 'error'))
+            .finally(() => showLoading(false));
+        }
+
+        // Profile
+        function updateProfile() {
+            const upi = document.getElementById('profileUPI').value;
+            showLoading(true);
+            
+            fetch(`${API_URL}/user/upi`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ upi_id: upi })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Update failed');
+                currentUser.upi_id = upi;
+                showToast('Profile updated!', 'success');
+            })
+            .catch(err => showToast(err.message, 'error'))
+            .finally(() => showLoading(false));
+        }
+
+        // Utilities
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Check for pending vote after payment redirect
+        window.addEventListener('load', () => {
+            const pending = sessionStorage.getItem('pendingVote');
+            if (pending && window.location.href.includes('callback')) {
+                const vote = JSON.parse(pending);
+                sessionStorage.removeItem('pendingVote');
+                // Try to cast the vote
+                fetch(`${API_URL}/polls/${vote.pollId}/vote`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ amount, upi_id: upiId })
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Withdrawal failed');
-                }
-                
-                hideLoading();
-                closeWithdrawModal();
-                showToast('Withdrawal request submitted!', 'success');
-                loadTransactions();
-            } catch (error) {
-                hideLoading();
-                showToast(error.message, 'error');
-            }
-        }
-        
-        // Profile Functions
-        async function updateProfile(event) {
-            event.preventDefault();
-            
-            const upiId = document.getElementById('profileUPI').value;
-            
-            try {
-                showLoading();
-                
-                const response = await fetch(`${API_URL}/user/upi`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ upi_id: upiId })
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Update failed');
-                }
-                
-                currentUser.upi_id = upiId;
-                hideLoading();
-                showToast('Profile updated!', 'success');
-            } catch (error) {
-                hideLoading();
-                showToast(error.message, 'error');
-            }
-        }
-        
-        // Utility Functions
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.add('show');
-        }
-        
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.remove('show');
-        }
-        
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toastMessage.textContent = message;
-            toast.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50';
-            
-            if (type === 'success') {
-                toast.classList.add('bg-green-600', 'text-white');
-            } else if (type === 'error') {
-                toast.classList.add('bg-red-600', 'text-white');
-            } else {
-                toast.classList.add('bg-gray-800', 'text-white');
-            }
-            
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-        
-        // Close modals on outside click
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('show');
-                }
-            });
-        });
-        
-        // Close user menu on outside click
-        document.addEventListener('click', (e) => {
-            const userMenu = document.getElementById('userMenu');
-            if (!e.target.closest('#userMenu') && !e.target.closest('button[onclick="toggleUserMenu()"]')) {
-                userMenu?.classList.add('hidden');
+                    body: JSON.stringify({
+                        option_id: vote.optionId,
+                        vote_count: vote.voteCount
+                    })
+                }).then(() => {
+                    showToast('Vote cast successfully!', 'success');
+                }).catch(() => {});
             }
         });
     </script>
