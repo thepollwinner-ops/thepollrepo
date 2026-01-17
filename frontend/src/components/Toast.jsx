@@ -11,7 +11,7 @@ export const ToastProvider = ({ children }) => {
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
+    }, 4000);
   }, []);
 
   const removeToast = (id) => {
@@ -21,21 +21,23 @@ export const ToastProvider = ({ children }) => {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 space-y-2">
+      <div className="fixed bottom-6 right-6 z-50 space-y-3">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-white ${
-              toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl text-white animate-fade-in backdrop-blur-lg ${
+              toast.type === 'success' 
+                ? 'bg-emerald-500/90 shadow-emerald-500/30' 
+                : 'bg-red-500/90 shadow-red-500/30'
             }`}
           >
             {toast.type === 'success' ? (
-              <CheckCircle className="w-5 h-5" />
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
             ) : (
-              <XCircle className="w-5 h-5" />
+              <XCircle className="w-5 h-5 flex-shrink-0" />
             )}
-            <span className="font-medium">{toast.message}</span>
-            <button onClick={() => removeToast(toast.id)}>
+            <span className="font-medium pr-2">{toast.message}</span>
+            <button onClick={() => removeToast(toast.id)} className="opacity-70 hover:opacity-100 transition">
               <X className="w-4 h-4" />
             </button>
           </div>
