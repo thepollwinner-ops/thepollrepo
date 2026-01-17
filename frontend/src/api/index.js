@@ -29,6 +29,6 @@ export const getTransactions = () => api.get('/transactions');
 export const requestWithdrawal = (amount, upiId) => api.post('/withdrawal/request', { amount, upi_id: upiId });
 
 // User APIs
-export const updateUPI = (upiId) => api.put('/user/upi', { upi_id: upiId });
+export const updateUPI = (upiId) => api.put('/profile/upi', { upi_id: upiId });
 
 export default api;
