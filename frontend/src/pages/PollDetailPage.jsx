@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, IndianRupee, List, Loader2 } from 'lucide-react';
+import { ArrowLeft, IndianRupee, Users, Clock, Loader2, Check, Minus, Plus } from 'lucide-react';
 import { getPoll, purchaseVotes, castVote } from '../api';
 import { useToast } from '../components/Toast';
 import Loading from '../components/Loading';
@@ -39,7 +39,6 @@ const PollDetailPage = () => {
 
     setProcessing(true);
     try {
-      // Create purchase order
       const purchaseRes = await purchaseVotes(pollId, {
         poll_id: pollId,
         vote_count: voteCount,
@@ -48,7 +47,6 @@ const PollDetailPage = () => {
 
       const data = purchaseRes.data;
 
-      // If auto-approved (test mode), cast vote immediately
       if (data.status === 'success') {
         await castVote(pollId, {
           option_id: selectedOption,
@@ -59,18 +57,13 @@ const PollDetailPage = () => {
         return;
       }
 
-      // If payment session available, redirect to Cashfree
       if (data.payment_session_id) {
-        // Store pending vote info
         sessionStorage.setItem('pendingVote', JSON.stringify({
           pollId,
           optionId: selectedOption,
           voteCount,
         }));
-
-        // Redirect to Cashfree checkout in same window
-        const checkoutUrl = `https://payments.cashfree.com/forms?sessionId=${data.payment_session_id}`;
-        window.location.href = checkoutUrl;
+        window.location.href = `https://payments.cashfree.com/forms?sessionId=${data.payment_session_id}`;
       }
     } catch (err) {
       showToast(err.response?.data?.detail || 'Failed to process vote', 'error');
@@ -84,94 +77,147 @@ const PollDetailPage = () => {
   const totalAmount = voteCount * poll.price_per_vote;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-4xl mx-auto animate-fade-in">
       <button
         onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-gray-600 hover:text-primary-600 mb-6 transition"
+        className="flex items-center gap-2 text-slate-400 hover:text-sky-400 mb-8 transition group"
       >
-        <ArrowLeft className="w-5 h-5" />
-        Back to Polls
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span className="font-medium">Back to Polls</span>
       </button>
 
-      <div className="card p-8">
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">{poll.title}</h1>
-          <p className="text-gray-600 text-lg leading-relaxed">{poll.description}</p>
+      <div className="glass-card overflow-hidden">
+        {/* Header */}
+        <div className="p-8 sm:p-10 border-b border-slate-700/50 gradient-mesh">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">{poll.title}</h1>
+            <span className="badge badge-success flex-shrink-0">Live</span>
+          </div>
+          <p className="text-slate-300 text-lg leading-relaxed">{poll.description}</p>
+          
+          <div className="flex flex-wrap gap-4 mt-8">
+            <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-black/20">
+              <IndianRupee className="w-5 h-5 text-emerald-400" />
+              <div>
+                <p className="text-xs text-slate-400">Price per vote</p>
+                <p className="font-bold text-white">₹{poll.price_per_vote}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-black/20">
+              <Users className="w-5 h-5 text-sky-400" />
+              <div>
+                <p className="text-xs text-slate-400">Options</p>
+                <p className="font-bold text-white">{poll.options?.length}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-6 p-4 bg-gray-50 rounded-xl mb-8">
-          <div className="flex items-center gap-2">
-            <IndianRupee className="w-5 h-5 text-primary-600" />
-            <span className="font-semibold text-gray-700">₹{poll.price_per_vote} per vote</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <List className="w-5 h-5 text-primary-600" />
-            <span className="font-semibold text-gray-700">{poll.options?.length} options</span>
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Select your option:</h3>
-          <div className="space-y-3">
+        {/* Options */}
+        <div className="p-8 sm:p-10">
+          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <span className="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center text-sky-400 text-sm">1</span>
+            Select Your Prediction
+          </h3>
+          
+          <div className="space-y-4 mb-10">
             {poll.options?.map((option) => (
-              <div
+              <button
                 key={option.option_id}
                 onClick={() => setSelectedOption(option.option_id)}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition flex items-center gap-4 ${
+                className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 ${
                   selectedOption === option.option_id
-                    ? 'border-primary-500 bg-primary-50'
-                    : 'border-gray-200 hover:border-primary-300'
+                    ? 'border-sky-500 bg-sky-500/10 shadow-lg shadow-sky-500/20'
+                    : 'border-slate-700 hover:border-slate-600 bg-slate-800/30'
                 }`}
               >
-                <div
-                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                    selectedOption === option.option_id
-                      ? 'border-primary-500 bg-primary-500'
-                      : 'border-gray-300'
-                  }`}
-                >
-                  {selectedOption === option.option_id && (
-                    <div className="w-2.5 h-2.5 bg-white rounded-full" />
-                  )}
+                <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                  selectedOption === option.option_id
+                    ? 'border-sky-500 bg-sky-500'
+                    : 'border-slate-500'
+                }`}>
+                  {selectedOption === option.option_id && <Check className="w-4 h-4 text-white" />}
                 </div>
-                <span className="font-medium text-gray-800">{option.text}</span>
-              </div>
+                <span className={`font-semibold text-lg transition-colors ${
+                  selectedOption === option.option_id ? 'text-white' : 'text-slate-300'
+                }`}>
+                  {option.text}
+                </span>
+              </button>
             ))}
           </div>
-        </div>
 
-        <div className="border-t border-gray-100 pt-6">
-          <div className="flex items-center gap-4 mb-6">
-            <label className="font-semibold text-gray-700">Number of votes:</label>
-            <input
-              type="number"
-              min="1"
-              max="100"
-              value={voteCount}
-              onChange={(e) => setVoteCount(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-24 px-4 py-3 border-2 border-gray-200 rounded-xl text-center font-semibold focus:border-primary-500 focus:outline-none"
-            />
+          {/* Vote Count */}
+          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <span className="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center text-sky-400 text-sm">2</span>
+            Choose Vote Quantity
+          </h3>
+          
+          <div className="flex items-center gap-6 mb-10">
+            <div className="flex items-center gap-3 bg-slate-800/50 rounded-2xl p-2">
+              <button
+                onClick={() => setVoteCount(Math.max(1, voteCount - 1))}
+                className="w-12 h-12 rounded-xl bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-white transition"
+              >
+                <Minus className="w-5 h-5" />
+              </button>
+              <span className="w-16 text-center text-2xl font-bold text-white">{voteCount}</span>
+              <button
+                onClick={() => setVoteCount(Math.min(100, voteCount + 1))}
+                className="w-12 h-12 rounded-xl bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-white transition"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="text-slate-400">
+              <span className="text-sm">Quick select:</span>
+              <div className="flex gap-2 mt-2">
+                {[5, 10, 25, 50].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => setVoteCount(n)}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+                      voteCount === n 
+                        ? 'bg-sky-500 text-white' 
+                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="bg-gradient-to-r from-primary-50 to-purple-50 p-6 rounded-xl mb-6 flex justify-between items-center">
-            <span className="font-semibold text-gray-700">Total Amount:</span>
-            <span className="text-3xl font-bold text-primary-600">₹{totalAmount}</span>
+          {/* Total & Submit */}
+          <div className="glass-card-light p-6 rounded-2xl mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-400 text-sm mb-1">Total Amount</p>
+                <p className="text-4xl font-bold text-white">
+                  ₹<span className="bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">{totalAmount}</span>
+                </p>
+              </div>
+              <div className="text-right text-slate-400 text-sm">
+                <p>{voteCount} vote{voteCount > 1 ? 's' : ''} × ₹{poll.price_per_vote}</p>
+              </div>
+            </div>
           </div>
 
           <button
             onClick={handleVote}
             disabled={processing || !selectedOption}
-            className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg"
+            className="btn btn-primary w-full py-5 text-lg"
           >
             {processing ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Processing...
+                <Loader2 className="w-6 h-6 animate-spin" />
+                Processing Payment...
               </>
             ) : (
               <>
-                <span>🗳️</span>
-                Confirm & Pay
+                <Sparkles className="w-6 h-6" />
+                Confirm & Pay ₹{totalAmount}
               </>
             )}
           </button>
@@ -180,5 +226,11 @@ const PollDetailPage = () => {
     </div>
   );
 };
+
+const Sparkles = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+  </svg>
+);
 
 export default PollDetailPage;
