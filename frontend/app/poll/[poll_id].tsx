@@ -163,7 +163,7 @@ export default function PollDetailScreen() {
       // Step 1: Purchase votes (initiate payment)
       const purchaseResponse = await axios.post(
         `${BACKEND_URL}/api/polls/${pollId}/purchase`,
-        { poll_id: pollId, vote_count: count },
+        { poll_id: pollId, vote_count: count, option_id: selectedOption },
         { withCredentials: true }
       );
 
