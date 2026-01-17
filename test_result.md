@@ -228,6 +228,102 @@ backend:
         agent: "testing"
         comment: "Authorization validation working correctly. Protected endpoints properly reject requests with invalid tokens (401) and missing authorization headers (401)."
 
+  - task: "User Registration"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "User registration endpoint working correctly. Successfully creates user account with email/password, returns user data, and sets session cookie. Tested with unique email validation."
+
+  - task: "User Login"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "User login endpoint working correctly. Validates credentials, creates session, and returns user data with session cookie. Authentication flow is fully functional."
+
+  - task: "Get Current User"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Get current user endpoint working correctly. Validates session token from Authorization header and returns user information. Session-based authentication is working properly."
+
+  - task: "Purchase Votes"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Purchase votes endpoint working correctly. Successfully integrates with Cashfree Orders API, creates valid payment orders with payment_session_id, and stores transaction records. Cashfree integration is fully functional."
+
+  - task: "Get Wallet"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Get wallet endpoint working correctly. Returns user wallet with balance information. Creates wallet automatically if not exists. Wallet system is functional."
+
+  - task: "Get Transactions"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Get transactions endpoint working correctly. Returns user transaction history sorted by creation date. Transaction tracking is working properly."
+
+  - task: "Get My Polls"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Get my polls endpoint working correctly. Returns user's poll participation history with voting details and results. Poll participation tracking is functional."
+
+  - task: "Payment Callback"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Payment callback endpoint working correctly. Handles payment return from Cashfree, processes vote casting, and redirects with proper ?payment=success parameter. Payment flow completion is working as expected."
+
 frontend:
   # No frontend testing performed as per instructions
 
