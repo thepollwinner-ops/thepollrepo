@@ -588,7 +588,7 @@ async def get_poll(poll_id: str):
 
 @api_router.post("/polls/{poll_id}/purchase")
 async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, req: Request, current_user: User = Depends(get_current_user)):
-    """Purchase votes for a poll using Cashfree Payment Links"""
+    """Purchase votes for a poll using Cashfree Orders API with session token for WebView checkout"""
     poll = await db.polls.find_one({"poll_id": poll_id}, {"_id": 0})
     if not poll:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found")
@@ -597,55 +597,52 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, req: Reque
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Poll is not active")
     
     amount = request.vote_count * poll["price_per_vote"]
-    link_id = f"link_{current_user.user_id}_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
+    order_id = f"order_{current_user.user_id[:8]}_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
     
     # Build return URL for redirect after payment
-    # Use a web page that will redirect to the app via deep link
     base_url = str(req.base_url).rstrip('/')
-    return_url = f"{base_url}/api/payment/callback?poll_id={poll_id}&link_id={link_id}&user_id={current_user.user_id}&vote_count={request.vote_count}&option_id={request.option_id if hasattr(request, 'option_id') else ''}"
+    return_url = f"{base_url}/api/payment/callback?poll_id={poll_id}&order_id={order_id}&user_id={current_user.user_id}&vote_count={request.vote_count}&option_id={request.option_id or ''}"
     
     try:
-        # Use Cashfree Payment Links API for direct URL that works on mobile
-        cashfree_url = "https://sandbox.cashfree.com/pg/links"
+        # Use Cashfree Orders API to create order with session token
+        cashfree_url = "https://sandbox.cashfree.com/pg/orders"
         
-        link_payload = {
-            "link_id": link_id,
-            "link_amount": amount,
-            "link_currency": "INR",
-            "link_purpose": f"Vote purchase for poll",
+        order_payload = {
+            "order_id": order_id,
+            "order_amount": float(amount),
+            "order_currency": "INR",
             "customer_details": {
+                "customer_id": current_user.user_id,
                 "customer_phone": "9999999999",
                 "customer_email": current_user.email,
                 "customer_name": current_user.name
             },
-            "link_notify": {
-                "send_sms": False,
-                "send_email": False
+            "order_meta": {
+                "return_url": return_url,
+                "notify_url": f"{base_url}/api/payment/webhook"
             },
-            "link_meta": {
-                "return_url": return_url
-            }
+            "order_note": f"Vote purchase for poll: {poll['title'][:50]}"
         }
         
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 cashfree_url,
-                json=link_payload,
+                json=order_payload,
                 headers={
                     "x-client-id": CASHFREE_CLIENT_ID,
                     "x-client-secret": CASHFREE_CLIENT_SECRET,
-                    "x-api-version": "2023-08-01",
+                    "x-api-version": CASHFREE_API_VERSION,
                     "Content-Type": "application/json"
                 },
                 timeout=15.0
             )
             
-            logger.info(f"Cashfree Payment Link response status: {response.status_code}")
-            logger.info(f"Cashfree Payment Link response: {response.text}")
+            logger.info(f"Cashfree Order response status: {response.status_code}")
+            logger.info(f"Cashfree Order response: {response.text}")
             
             if response.status_code in [200, 201]:
                 cashfree_data = response.json()
-                payment_url = cashfree_data.get("link_url")
+                payment_session_id = cashfree_data.get("payment_session_id")
                 
                 # Store transaction
                 transaction = {
@@ -655,21 +652,26 @@ async def purchase_votes(poll_id: str, request: PurchaseVotesRequest, req: Reque
                     "amount": amount,
                     "status": "pending",
                     "poll_id": poll_id,
-                    "cashfree_order_id": link_id,
+                    "cashfree_order_id": order_id,
                     "vote_count": request.vote_count,
+                    "option_id": request.option_id,
                     "created_at": datetime.now(timezone.utc)
                 }
                 await db.transactions.insert_one(transaction)
                 
+                # Return data needed for WebView checkout
                 return {
-                    "order_id": link_id,
-                    "payment_url": payment_url,
-                    "cf_link_id": cashfree_data.get("cf_link_id"),
+                    "order_id": order_id,
+                    "payment_session_id": payment_session_id,
+                    "order_token": cashfree_data.get("order_token"),
+                    "cf_order_id": cashfree_data.get("cf_order_id"),
                     "amount": amount,
-                    "status": "pending"
+                    "status": "pending",
+                    "return_url": return_url,
+                    "environment": "sandbox"  # or "production"
                 }
             else:
-                logger.error(f"Cashfree Payment Link error: {response.text}")
+                logger.error(f"Cashfree Order error: {response.text}")
                 # Fall back to auto-approve for testing when Cashfree fails
                 
     except Exception as e:
