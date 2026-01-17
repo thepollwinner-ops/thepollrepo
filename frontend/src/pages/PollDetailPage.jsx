@@ -63,8 +63,32 @@ const PollDetailPage = () => {
           optionId: selectedOption,
           voteCount,
         }));
-        // Use Cashfree sandbox redirect checkout URL
-        window.location.href = `https://sandbox.cashfree.com/pg/view/sessions/${data.payment_session_id}`;
+        
+        // Load Cashfree SDK dynamically and initiate checkout
+        const script = document.createElement('script');
+        script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+        script.onload = () => {
+          const cashfree = window.Cashfree({ mode: 'sandbox' });
+          cashfree.checkout({
+            paymentSessionId: data.payment_session_id,
+            redirectTarget: '_self',
+          }).then((result) => {
+            if (result.error) {
+              showToast('Payment failed: ' + result.error.message, 'error');
+              setProcessing(false);
+            }
+            // If redirect happens, this won't execute
+          }).catch((error) => {
+            showToast('Payment error: ' + error.message, 'error');
+            setProcessing(false);
+          });
+        };
+        script.onerror = () => {
+          showToast('Failed to load payment gateway', 'error');
+          setProcessing(false);
+        };
+        document.body.appendChild(script);
+        return;
       }
     } catch (err) {
       showToast(err.response?.data?.detail || 'Failed to process vote', 'error');
